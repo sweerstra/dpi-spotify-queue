@@ -1,8 +1,8 @@
-import { h, app } from 'hyperapp';
+import { app } from 'hyperapp';
 import './css/style.css';
 import { MUSIC_API_KEY } from './js/ApiConfig';
-import { loader } from './js/loader';
-import { SearchIcon, ClockIcon } from './js/icons';
+import { Loader } from './js/loader';
+import { ClockIcon, SearchIcon } from './js/icons';
 
 const state = {
   searchedMusic: [],
@@ -18,6 +18,8 @@ const actions = {
 };
 
 const getMusic = (actions, value) => {
+  if (!value) return;
+
   actions.setLoading(true);
   return fetch(`https://ws.audioscrobbler.com/2.0/?method=track.search&track=${value}&api_key=${MUSIC_API_KEY}&format=json`)
     .then(resp => resp.json())
@@ -47,17 +49,18 @@ const view = (state, actions) => (
                }}/>
         <SearchIcon onclick={() => getMusic(actions, state.search)}/>
       </div>
-      <ul class="search-list">
-        {state.searchedMusic.map(({ name, artist }) =>
-          <li class="search-list__item" onclick={() => actions.addToHistory({ name, artist })}>
-            <span>{name}</span>
-            <span>{artist}</span>
-          </li>
-        )}
-      </ul>
-      <div class="search__loader">
-        {state.loading && loader}
-      </div>
+      {!state.loading
+        ? <ul class="search-list">
+          {state.searchedMusic.map(({ name, artist }) =>
+            <li class="search-list__item" onclick={() => actions.addToHistory({ name, artist })}>
+              <span>{name}</span>
+              <span>{artist}</span>
+            </li>
+          )}
+        </ul>
+        : <div class="search__loader">
+          <Loader/>
+        </div>}
     </div>
 
     <div class="selected-list">
