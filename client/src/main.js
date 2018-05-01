@@ -3,6 +3,16 @@ import './css/style.css';
 import { MUSIC_API_KEY } from './js/ApiConfig';
 import { Loader } from './js/loader';
 import { ClockIcon, SearchIcon } from './js/icons';
+import org from './vendor/amq';
+
+const amq = org.activemq.Amq;
+const amqTopic = 'topic://suggestionRequestTopic';
+
+amq.init({
+  uri: 'http://localhost:8080/amq',
+  logging: true,
+  timeout: 2000
+});
 
 const state = {
   searchedMusic: [],
@@ -13,7 +23,13 @@ const state = {
 const actions = {
   setSearchedMusic: searchedMusic => state => ({ searchedMusic }),
   setSearch: e => state => ({ search: e.target.value }),
-  addToHistory: track => state => ({ addedMusic: [...state.addedMusic, track] }),
+  addToHistory: track => {
+    const stringified = JSON.stringify(track);
+    console.log({ track: stringified });
+    amq.sendMessage(amqTopic, stringified);
+
+    return state => ({ addedMusic: [...state.addedMusic, track] });
+  },
   setLoading: loading => state => ({ loading })
 };
 
