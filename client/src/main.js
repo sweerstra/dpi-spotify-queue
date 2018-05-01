@@ -1,8 +1,8 @@
-import { app } from 'hyperapp';
+import { h, app } from 'hyperapp';
 import './css/style.css';
-import { MUSIC_API_KEY } from './js/ApiConfig';
 import { Loader } from './js/loader';
 import { ClockIcon, SearchIcon } from './js/icons';
+import Api from './js/api';
 import org from './vendor/amq';
 
 const amq = org.activemq.Amq;
@@ -37,10 +37,10 @@ const getMusic = (actions, value) => {
   if (!value) return;
 
   actions.setLoading(true);
-  return fetch(`https://ws.audioscrobbler.com/2.0/?method=track.search&track=${value}&api_key=${MUSIC_API_KEY}&format=json`)
-    .then(resp => resp.json())
+
+  Api.searchTrack(value)
     .then(music => {
-      actions.setSearchedMusic(music.results.trackmatches.track);
+      actions.setSearchedMusic(music.tracks.items);
       actions.setLoading(false);
     });
 };
@@ -67,10 +67,11 @@ const view = (state, actions) => (
       </div>
       {!state.loading
         ? <ul class="search-list">
-          {state.searchedMusic.map(({ name, artist }) =>
-            <li class="search-list__item" onclick={() => actions.addToHistory({ name, artist })}>
-              <span>{name}</span>
-              <span>{artist}</span>
+          {state.searchedMusic.map(({ name, artists, album, uri }, index) =>
+            <li class="search-list__item" onclick={() => actions.addToHistory({ name, artists, uri })} key={index}>
+              <img class="search-list__item__image" src={album.images[album.images.length - 1].url}/>
+              <span class="search-list__item__name">{name}</span>
+              <span class="search-list__item__artist">{artists.map(artist => artist.name).join(', ')}</span>
             </li>
           )}
         </ul>
@@ -85,10 +86,10 @@ const view = (state, actions) => (
         <ClockIcon/>
       </div>
       <ul class="selected-list__items">
-        {state.addedMusic.map(({ name, artist }) =>
-          <li class="selected-list__item">
+        {state.addedMusic.map(({ name, artists }, index) =>
+          <li class="selected-list__item" key={index}>
             <span>{name}</span>
-            <span>{artist}</span>
+            <span>{artists[0].name}</span>
           </li>
         )}
       </ul>
