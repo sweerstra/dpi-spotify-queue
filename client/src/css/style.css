@@ -90,7 +90,8 @@ nav {
   align-items: center;
 }
 
-.search-list__item:hover {
+.search-list__item:hover,
+.search-list__item:active {
   background-color: rgba(0, 0, 0, 0.2);
   transition: background linear 200ms;
   cursor: pointer;
@@ -99,12 +100,24 @@ nav {
 .search-list__item__image {
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 4px;
   margin-right: 20px;
+}
+
+.search-list__item__name {
+  font-weight: bold;
 }
 
 .search-list__item__artist {
   margin-left: auto;
+  text-align: right;
+}
+
+.search-list__item__duration {
+  margin-left: 20px;
+  width: 50px;
+  font-style: italic;
+  text-align: right;
 }
 
 .search__loader {
@@ -122,14 +135,19 @@ nav {
   height: 80px;
   margin-bottom: 20px;
   padding: 20px;
-  color: var(--color-white);
-  background-color: var(--color-tint);
+  color: var(--color-tint);
   border: 3px solid var(--color-tint);
   border-radius: 4px;
   font-size: 1.4em;
+  font-weight: bold;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+}
+
+.feather-clock {
+  stroke: var(--color-tint);
+  margin-left: auto;
+  margin-right: 20px;
 }
 
 .selected-list__items {
@@ -140,12 +158,27 @@ nav {
 .selected-list__item {
   margin-bottom: 4px;
   padding: 20px;
-  color: var(--color-white);
-  background-color: var(--color-tint);
+  color: var(--color-tint);
+  border: 2px solid var(--color-tint);
   border-radius: 4px;
-  font-weight: bold;
   display: flex;
   justify-content: space-between;
+}
+
+.selected-list__item__name {
+  font-weight: bold;
+}
+
+.selected-list__item__artists {
+  margin-left: auto;
+  text-align: right;
+}
+
+.selected-list__item__duration {
+  margin-left: 20px;
+  font-style: italic;
+  display: flex;
+  align-items: center;
 }
 
 a {
@@ -164,6 +197,14 @@ a:hover {
   cursor: pointer;
 }
 
-.feather-clock {
-  stroke: var(--color-white);
+@media (max-width: 992px) {
+  .container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas: "nav" "search" "history"
+  }
+
+  .selected-list {
+    margin-left: 30px;
+  }
 }

@@ -1,6 +1,7 @@
 import Request from './Request';
-import { TOKEN } from '../ApiConfig';
+
+const token = localStorage.getItem('access_token');
 
 export default {
-  searchTrack: q => Request.get(`https://api.spotify.com/v1/search?q=${q}&type=track,artist`, TOKEN)
+  searchTrack: q => Request.get(`https://api.spotify.com/v1/search?q=${q}&type=track,artist`, token)
 };

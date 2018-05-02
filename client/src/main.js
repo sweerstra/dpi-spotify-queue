@@ -15,6 +15,7 @@ amq.init({
 });
 
 const state = {
+  search: '',
   searchedMusic: [],
   addedMusic: [],
   loading: false
@@ -25,7 +26,6 @@ const actions = {
   setSearch: e => state => ({ search: e.target.value }),
   addToHistory: track => {
     const stringified = JSON.stringify(track);
-    console.log({ track: stringified });
     amq.sendMessage(amqTopic, stringified);
 
     return state => ({ addedMusic: [...state.addedMusic, track] });
@@ -45,7 +45,14 @@ const getMusic = (actions, value) => {
     });
 };
 
-const view = (state, actions) => (
+const formatDuration = (duration) => {
+  const seconds = duration / 1000;
+  const minutes = Math.floor(seconds / 60);
+  const remainderSeconds = Math.round(seconds % 60);
+  return `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
+};
+
+const view = ({ search, searchedMusic, addedMusic, loading }, actions) => (
   <div class="container">
     <nav>
       <h1>Spotify Queue Client</h1>
@@ -56,23 +63,29 @@ const view = (state, actions) => (
 
     <div class="search">
       <div class="search__bar">
-        <input type="text" class="search__bar__input" placeholder="Search music..." spellcheck="false" autofocus="true"
+        <input type="text" class="search__bar__input" placeholder="Search music..." spellcheck="false"
+               autofocus="true"
                oninput={actions.setSearch}
                onkeypress={e => {
                  if (e.keyCode === 13) {
                    getMusic(actions, e.target.value);
                  }
                }}/>
-        <SearchIcon onclick={() => getMusic(actions, state.search)}/>
+        <SearchIcon onclick={() => getMusic(actions, search)}/>
       </div>
-      {!state.loading
+      {!loading
         ? <ul class="search-list">
-          {state.searchedMusic.map(({ name, artists, album, uri }, index) =>
-            <li class="search-list__item" onclick={() => actions.addToHistory({ name, artists, uri })} key={index}>
-              <img class="search-list__item__image" src={album.images[album.images.length - 1].url}/>
-              <span class="search-list__item__name">{name}</span>
-              <span class="search-list__item__artist">{artists.map(artist => artist.name).join(', ')}</span>
-            </li>
+          {searchedMusic.map(({ name, artists, album, duration_ms, uri }, index) => {
+              artists = artists.map(artist => artist.name);
+              return <li class="search-list__item"
+                         onclick={() => actions.addToHistory({ name, artists, duration: duration_ms, uri })}
+                         key={index}>
+                <img class="search-list__item__image" src={album.images[album.images.length - 1].url}/>
+                <span class="search-list__item__name">{name}</span>
+                <span class="search-list__item__artist">{artists.join(', ')}</span>
+                <span class="search-list__item__duration">{formatDuration(duration_ms)}</span>
+              </li>;
+            }
           )}
         </ul>
         : <div class="search__loader">
@@ -84,14 +97,18 @@ const view = (state, actions) => (
       <div class="selected-list__heading">
         Your Track History
         <ClockIcon/>
+        <span>
+          {formatDuration(addedMusic.reduce((total, track) => total + track.duration, 0))}
+        </span>
       </div>
       <ul class="selected-list__items">
-        {state.addedMusic.map(({ name, artists }, index) =>
+        {addedMusic.map(({ name, artists, duration }, index) => (
           <li class="selected-list__item" key={index}>
-            <span>{name}</span>
-            <span>{artists[0].name}</span>
+            <span class="selected-list__item__name">{name}</span>
+            <span class="selected-list__item__artists">{artists[0]}</span>
+            <span class="selected-list__item__duration">{formatDuration(duration)}</span>
           </li>
-        )}
+        ))}
       </ul>
     </div>
   </div>
