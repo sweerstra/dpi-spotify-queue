@@ -120,6 +120,10 @@ nav {
   text-align: right;
 }
 
+.search-list__no-results {
+  padding-left: 20px;
+}
+
 .search__loader {
   display: flex;
   justify-content: center;
@@ -162,6 +166,7 @@ nav {
   border: 2px solid var(--color-tint);
   border-radius: 4px;
   display: flex;
+  align-items: center;
   justify-content: space-between;
 }
 
@@ -177,8 +182,6 @@ nav {
 .selected-list__item__duration {
   margin-left: 20px;
   font-style: italic;
-  display: flex;
-  align-items: center;
 }
 
 a {
@@ -194,7 +197,6 @@ a:hover {
   position: relative;
   right: 50px;
   stroke: var(--color-tint);
-  cursor: pointer;
 }
 
 @media (max-width: 992px) {

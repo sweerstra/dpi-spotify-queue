@@ -2,6 +2,7 @@ import { h, app } from 'hyperapp';
 import './css/style.css';
 import { Loader } from './js/loader';
 import { ClockIcon, SearchIcon } from './js/icons';
+import { debounce } from './js/utils';
 import Api from './js/api';
 import org from './vendor/amq';
 
@@ -16,24 +17,22 @@ amq.init({
 
 const state = {
   search: '',
-  searchedMusic: [],
+  searchedMusic: null,
   addedMusic: [],
   loading: false
 };
 
 const actions = {
   setSearchedMusic: searchedMusic => state => ({ searchedMusic }),
-  setSearch: e => state => ({ search: e.target.value }),
   addToHistory: track => {
     const stringified = JSON.stringify(track);
     amq.sendMessage(amqTopic, stringified);
-
     return state => ({ addedMusic: [...state.addedMusic, track] });
   },
   setLoading: loading => state => ({ loading })
 };
 
-const getMusic = (actions, value) => {
+const getMusic = (value, actions) => {
   if (!value) return;
 
   actions.setLoading(true);
@@ -42,11 +41,19 @@ const getMusic = (actions, value) => {
     .then(music => {
       actions.setSearchedMusic(music.tracks.items);
       actions.setLoading(false);
+    })
+    .catch(() => {
+      actions.setSearchedMusic([]);
+      actions.setLoading(false);
     });
 };
 
-const formatDuration = (duration) => {
-  const seconds = duration / 1000;
+const searchCallback = debounce((value, actions) => {
+  getMusic(value, actions);
+}, 500);
+
+const formatDuration = (durationInMilliseconds) => {
+  const seconds = durationInMilliseconds / 1000;
   const minutes = Math.floor(seconds / 60);
   const remainderSeconds = Math.round(seconds % 60);
   return `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
@@ -63,34 +70,30 @@ const view = ({ search, searchedMusic, addedMusic, loading }, actions) => (
 
     <div class="search">
       <div class="search__bar">
-        <input type="text" class="search__bar__input" placeholder="Search music..." spellcheck="false"
+        <input type="text" class="search__bar__input" placeholder="Search for music..." spellcheck="false"
                autofocus="true"
-               oninput={actions.setSearch}
-               onkeypress={e => {
-                 if (e.keyCode === 13) {
-                   getMusic(actions, e.target.value);
-                 }
-               }}/>
-        <SearchIcon onclick={() => getMusic(actions, search)}/>
+               oninput={e => searchCallback(e.target.value, actions)}/>
+        <SearchIcon/>
       </div>
-      {!loading
-        ? <ul class="search-list">
-          {searchedMusic.map(({ name, artists, album, duration_ms, uri }, index) => {
-              artists = artists.map(artist => artist.name);
-              return <li class="search-list__item"
-                         onclick={() => actions.addToHistory({ name, artists, duration: duration_ms, uri })}
-                         key={index}>
-                <img class="search-list__item__image" src={album.images[album.images.length - 1].url}/>
-                <span class="search-list__item__name">{name}</span>
-                <span class="search-list__item__artist">{artists.join(', ')}</span>
-                <span class="search-list__item__duration">{formatDuration(duration_ms)}</span>
-              </li>;
-            }
-          )}
-        </ul>
-        : <div class="search__loader">
-          <Loader/>
+      <ul class="search-list">
+        {(searchedMusic && searchedMusic.length > 0) && searchedMusic.map(({ name, artists, album, duration_ms, uri }, index) => {
+          artists = artists.map(artist => artist.name);
+          return <li class="search-list__item"
+                     onclick={() => actions.addToHistory({ name, artists, duration: duration_ms, uri })}
+                     key={index}>
+            <img class="search-list__item__image" src={album.images[album.images.length - 1].url}/>
+            <span class="search-list__item__name">{name}</span>
+            <span class="search-list__item__artist">{artists.join(', ')}</span>
+            <span class="search-list__item__duration">{formatDuration(duration_ms)}</span>
+          </li>;
+        })}
+        {searchedMusic && searchedMusic.length === 0 && <div class="search-list__no-results">
+          No music was found.
         </div>}
+      </ul>
+      {loading && <div class="search__loader">
+        <Loader/>
+      </div>}
     </div>
 
     <div class="selected-list">
