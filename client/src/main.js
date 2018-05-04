@@ -5,6 +5,7 @@ import { ClockIcon, SearchIcon } from './js/icons';
 import { debounce } from './js/utils';
 import Api from './js/api';
 import org from './vendor/amq';
+import TokenField from './js/components/TokenField';
 
 const amq = org.activemq.Amq;
 const amqTopic = 'topic://suggestionRequestTopic';
@@ -19,7 +20,8 @@ const state = {
   search: '',
   searchedMusic: null,
   addedMusic: [],
-  loading: false
+  loading: false,
+  token: Api.getToken()
 };
 
 const actions = {
@@ -29,7 +31,11 @@ const actions = {
     amq.sendMessage(amqTopic, stringified);
     return state => ({ addedMusic: [...state.addedMusic, track] });
   },
-  setLoading: loading => state => ({ loading })
+  setLoading: loading => state => ({ loading }),
+  setToken: token => state => {
+    Api.setToken(token);
+    return { token };
+  }
 };
 
 const getMusic = (value, actions) => {
@@ -38,14 +44,13 @@ const getMusic = (value, actions) => {
   actions.setLoading(true);
 
   Api.searchTrack(value)
-    .then(music => {
-      actions.setSearchedMusic(music.tracks.items);
-      actions.setLoading(false);
-    })
+    .then(music => actions.setSearchedMusic(music.tracks.items))
     .catch(() => {
+      // unauthorized, so remove token
+      actions.setToken(null);
       actions.setSearchedMusic([]);
-      actions.setLoading(false);
-    });
+    })
+    .then(() => actions.setLoading(false));
 };
 
 const searchCallback = debounce((value, actions) => {
@@ -59,10 +64,11 @@ const formatDuration = (durationInMilliseconds) => {
   return `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
 };
 
-const view = ({ search, searchedMusic, addedMusic, loading }, actions) => (
+const view = ({ search, searchedMusic, addedMusic, loading, token }, actions) => (
   <div class="container">
     <nav>
       <h1>Spotify Queue Client</h1>
+      <TokenField onSubmit={actions.setToken} token={token}/>
       <div>
         <a href="#">View Queue</a>
       </div>
@@ -88,7 +94,7 @@ const view = ({ search, searchedMusic, addedMusic, loading }, actions) => (
           </li>;
         })}
         {searchedMusic && searchedMusic.length === 0 && <div class="search-list__no-results">
-          No music was found.
+          No results found.
         </div>}
       </ul>
       {loading && <div class="search__loader">

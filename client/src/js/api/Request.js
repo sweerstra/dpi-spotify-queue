@@ -10,15 +10,14 @@ class Request {
     });
   }
 
-  _request(url, token, options) {
-    const headers = { 'Content-Type': 'application/json' };
+  _request(url, token, options = {}) {
+    const headers = { ...options.headers, 'Content-Type': 'application/json' };
 
     if (token) {
       headers.Authorization = token;
     }
 
-    return fetch(url, { ...options, headers })
-      .then(resp => resp.json());
+    return fetch(url, { ...options, headers });
   };
 }
 
