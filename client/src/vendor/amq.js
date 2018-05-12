@@ -151,9 +151,6 @@ org.activemq.Amq = function () {
    * invoke the handler with the matching id.
    */
   var messageHandler = function (data) {
-    console.log(data);
-    return;
-
     var response = data.getElementsByTagName("ajax-response");
     if (response != null && response.length == 1) {
       connectStatusHandler(true);

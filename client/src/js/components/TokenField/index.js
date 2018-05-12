@@ -1,22 +1,20 @@
-import { h } from 'hyperapp';
 import './TokenField.css';
-import { RefreshIcon } from '../icons';
 
-const TokenField = ({ token, onSubmit }) => (
+const TokenField = ({ token, isEditing, onSubmit, onEdit }) => (
   <div class="token-field">
-    {!token
+    {isEditing
       ? <form onsubmit={e => {
         e.preventDefault();
         onSubmit(e.target.token.value);
       }}>
         <div class="token-field--empty">
           <input type="text" name="token"
-                 class="token-field__input" placeholder="Enter or generate token..."
+                 value={token}
+                 class="token-field__input" placeholder="Enter Bearer token..."
                  autocomplete="off" spellcheck="false"/>
-          <RefreshIcon class="token-field__refresh"/>
         </div>
       </form>
-      : <div class="token-field--filled" onclick={() => onSubmit(null)}>
+      : <div class="token-field--filled" onclick={() => onEdit(true)}>
         Token in use
       </div>}
   </div>

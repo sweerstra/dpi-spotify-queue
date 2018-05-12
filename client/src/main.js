@@ -1,41 +1,50 @@
-import { h, app } from 'hyperapp';
+import { app } from 'hyperapp';
 import './css/style.css';
-import { Loader } from './js/loader';
-import { ClockIcon, SearchIcon } from './js/icons';
+import { ClockIcon, PlayIcon, SearchIcon } from './js/icons';
 import { debounce } from './js/utils';
 import Api from './js/api';
 import org from './vendor/amq';
 import TokenField from './js/components/TokenField';
+import Loader from './js/components/Loader';
 
 const amq = org.activemq.Amq;
-const amqTopic = 'topic://suggestionRequestTopic';
 
-amq.init({
-  uri: 'http://localhost:8080/amq',
-  logging: true,
-  timeout: 2000
-});
+const token = Api.token.getToken();
 
 const state = {
   search: '',
   searchedMusic: null,
   addedMusic: [],
-  loading: false,
-  token: Api.getToken()
+  isLoading: false,
+  token,
+  isEditingToken: !token
 };
 
 const actions = {
   setSearchedMusic: searchedMusic => state => ({ searchedMusic }),
   addToHistory: track => {
     const stringified = JSON.stringify(track);
-    amq.sendMessage(amqTopic, stringified);
+    amq.sendMessage(amqRequestTopic, stringified);
     return state => ({ addedMusic: [...state.addedMusic, track] });
   },
-  setLoading: loading => state => ({ loading }),
-  setToken: token => state => {
-    Api.setToken(token);
-    return { token };
-  }
+  setTrackToIsPlaying: uri => state => ({
+    addedMusic: state.addedMusic.map(track => {
+      const isPlaying = track.uri === uri;
+      return { ...track, isPlaying };
+    })
+  }),
+  setLoading: isLoading => state => ({ isLoading }),
+  setToken: token => () => {
+    if (token) {
+      Api.token.setToken(token);
+    }
+    return { token, isEditingToken: !token };
+  },
+  removeToken: () => () => {
+    Api.token.removeToken();
+    return { token: null, isEditingToken: true };
+  },
+  setEditingToken: isEditingToken => state => ({ isEditingToken })
 };
 
 const getMusic = (value, actions) => {
@@ -43,11 +52,11 @@ const getMusic = (value, actions) => {
 
   actions.setLoading(true);
 
-  Api.searchTrack(value)
+  Api.music.searchTrack(value)
     .then(music => actions.setSearchedMusic(music.tracks.items))
     .catch(() => {
       // unauthorized, so remove token
-      actions.setToken(null);
+      actions.removeToken();
       actions.setSearchedMusic([]);
     })
     .then(() => actions.setLoading(false));
@@ -64,11 +73,14 @@ const formatDuration = (durationInMilliseconds) => {
   return `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
 };
 
-const view = ({ search, searchedMusic, addedMusic, loading, token }, actions) => (
+const view = ({ search, searchedMusic, addedMusic, isLoading, token, isEditingToken }, actions) => (
   <div class="container">
     <nav>
       <h1>Spotify Queue Client</h1>
-      <TokenField onSubmit={actions.setToken} token={token}/>
+      <TokenField token={token}
+                  isEditing={isEditingToken}
+                  onSubmit={actions.setToken}
+                  onEdit={actions.setEditingToken}/>
       <div>
         <a href="#">View Queue</a>
       </div>
@@ -76,7 +88,7 @@ const view = ({ search, searchedMusic, addedMusic, loading, token }, actions) =>
 
     <div class="search">
       <div class="search__bar">
-        <input type="text" class="search__bar__input" placeholder="Search for music..." spellcheck="false"
+        <input type="text" class="search__bar__input" placeholder="Search for music..." spellcheck={false}
                autofocus="true"
                oninput={e => searchCallback(e.target.value, actions)}/>
         <SearchIcon/>
@@ -97,7 +109,7 @@ const view = ({ search, searchedMusic, addedMusic, loading, token }, actions) =>
           No results found.
         </div>}
       </ul>
-      {loading && <div class="search__loader">
+      {isLoading && <div class="search__loader">
         <Loader/>
       </div>}
     </div>
@@ -106,14 +118,12 @@ const view = ({ search, searchedMusic, addedMusic, loading, token }, actions) =>
       <div class="selected-list__heading">
         Your Track History
         <ClockIcon/>
-        <span>
-          {formatDuration(addedMusic.reduce((total, track) => total + track.duration, 0))}
-        </span>
       </div>
       <ul class="selected-list__items">
-        {addedMusic.map(({ name, artists, duration }, index) => (
+        {addedMusic.map(({ name, artists, duration, isPlaying }, index) => (
           <li class="selected-list__item" key={index}>
             <span class="selected-list__item__name">{name}</span>
+            {isPlaying ? <PlayIcon/> : undefined}
             <span class="selected-list__item__artists">{artists[0]}</span>
             <span class="selected-list__item__duration">{formatDuration(duration)}</span>
           </li>
@@ -123,4 +133,21 @@ const view = ({ search, searchedMusic, addedMusic, loading, token }, actions) =>
   </div>
 );
 
-app(state, actions, view, document.getElementById('root'));
+const main = app(state, actions, view, document.getElementById('root'));
+
+const amqRequestTopic = 'topic://suggestionRequestTopic';
+const amqResponseQueue = 'queue://trackRequestQueue';
+
+amq.init({
+  uri: 'http://localhost:8080/amq',
+  logging: true,
+  timeout: 2000
+});
+
+const handleTrackResponse = ({ textContent }) => {
+  const track = JSON.parse(textContent);
+  console.log('Message Response: ', track);
+  main.setTrackToIsPlaying(track.uri);
+};
+
+amq.addListener('id', amqResponseQueue, handleTrackResponse);

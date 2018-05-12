@@ -1,9 +1,10 @@
-import { h } from 'hyperapp';
-import '../css/loader.css';
+import './loader.css';
 
-export const Loader = () => (
+const Loader = () => (
   <div class="loader">
     <div class="loader__first"/>
     <div class="loader__second"/>
   </div>
 );
+
+export default Loader;
