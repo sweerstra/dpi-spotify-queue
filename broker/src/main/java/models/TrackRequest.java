@@ -8,6 +8,13 @@ public class TrackRequest implements Serializable {
     private String[] artists;
     private int duration;
 
+    public TrackRequest(String uri, String name, String[] artists, int duration) {
+        this.uri = uri;
+        this.name = name;
+        this.artists = artists;
+        this.duration = duration;
+    }
+
     public TrackRequest() { }
 
     public String getUri() {
