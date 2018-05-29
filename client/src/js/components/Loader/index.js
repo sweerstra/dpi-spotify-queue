@@ -1,3 +1,4 @@
+import { h } from 'hyperapp';
 import './loader.css';
 
 const Loader = () => (

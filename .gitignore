@@ -25,10 +25,13 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-# dependencies
-client/node_modules
+# Dependencies
+node_modules
 
-# production
+# Production
 /dist
 
 npm-debug.log*
+
+# Environment
+.env

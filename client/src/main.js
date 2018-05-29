@@ -1,23 +1,57 @@
-import { app } from 'hyperapp';
+import { h, app } from 'hyperapp';
 import './css/style.css';
 import { ClockIcon, PlayIcon, SearchIcon } from './js/icons';
-import { debounce } from './js/utils';
-import Api from './js/api';
+import { debounce, getUrlHashParams } from './js/utils';
+import Storage from './js/data/Storage';
+import Api from './js/data/Api';
 import org from './vendor/amq';
-import TokenField from './js/components/TokenField';
 import Loader from './js/components/Loader';
 
 const amq = org.activemq.Amq;
 
-const token = Api.token.getToken();
+document.addEventListener('DOMContentLoaded', () => {
+  const storedToken = Storage.getToken();
+  const isExpiredToken = Storage.hasExpiredToken();
+
+  // if token is stored and has not expired
+  if (storedToken) {
+    if (isExpiredToken) {
+      Storage.removeToken();
+      redirectToSpotifyAuthorization();
+    }
+
+    return;
+  }
+
+  const params = getUrlHashParams(window.location.href);
+
+  // check if url contains authentication token and correct state
+  if (params) {
+    const { access_token, state, expires_in } = params;
+
+    if (access_token && state === 'client') {
+      Storage.setToken(`Bearer ${access_token}`, parseFloat(expires_in));
+      return;
+    }
+  }
+
+  redirectToSpotifyAuthorization();
+});
+
+const redirectToSpotifyAuthorization = () => {
+  const clientId = '5d155fde6d184e87bdb4be4639ee0aab';
+  const redirectUri = 'http://localhost:8081';
+  const spotifyUrl = 'https://accounts.spotify.com/authorize?response_type=token&' +
+    `client_id=${clientId}&state=client&redirect_uri=${redirectUri}`;
+
+  window.location.replace(spotifyUrl);
+};
 
 const state = {
   search: '',
   searchedMusic: null,
   addedMusic: [],
-  isLoading: false,
-  token,
-  isEditingToken: !token
+  isLoading: false
 };
 
 const actions = {
@@ -25,6 +59,7 @@ const actions = {
   addToHistory: track => {
     const stringified = JSON.stringify(track);
     amq.sendMessage(amqRequestTopic, stringified);
+    console.log(stringified);
     return state => ({ addedMusic: [...state.addedMusic, track] });
   },
   setTrackToIsPlaying: uri => state => ({
@@ -33,38 +68,26 @@ const actions = {
       return { ...track, isPlaying };
     })
   }),
-  setLoading: isLoading => state => ({ isLoading }),
-  setToken: token => () => {
-    if (token) {
-      Api.token.setToken(token);
-    }
-    return { token, isEditingToken: !token };
-  },
-  removeToken: () => () => {
-    Api.token.removeToken();
-    return { token: null, isEditingToken: true };
-  },
-  setEditingToken: isEditingToken => state => ({ isEditingToken })
+  setLoading: isLoading => state => ({ isLoading })
 };
 
 const getMusic = (value, actions) => {
-  if (!value) return;
+  if (!value) {
+    return;
+  }
 
   actions.setLoading(true);
 
-  Api.music.searchTrack(value)
+  Api.searchSpotifyTrack(value, Storage.getToken())
     .then(music => actions.setSearchedMusic(music.tracks.items))
     .catch(() => {
-      // unauthorized, so remove token
-      actions.removeToken();
-      actions.setSearchedMusic([]);
+      Storage.removeToken();
+      redirectToSpotifyAuthorization();
     })
     .then(() => actions.setLoading(false));
 };
 
-const searchCallback = debounce((value, actions) => {
-  getMusic(value, actions);
-}, 500);
+const searchCallback = debounce((value, actions) => getMusic(value, actions), 500);
 
 const formatDuration = (durationInMilliseconds) => {
   const seconds = durationInMilliseconds / 1000;
@@ -73,14 +96,10 @@ const formatDuration = (durationInMilliseconds) => {
   return `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
 };
 
-const view = ({ search, searchedMusic, addedMusic, isLoading, token, isEditingToken }, actions) => (
+const view = ({ search, searchedMusic, addedMusic, isLoading }, actions) => (
   <div class="container">
     <nav>
       <h1>Spotify Queue Client</h1>
-      <TokenField token={token}
-                  isEditing={isEditingToken}
-                  onSubmit={actions.setToken}
-                  onEdit={actions.setEditingToken}/>
       <div>
         <a href="#">View Queue</a>
       </div>
@@ -88,8 +107,7 @@ const view = ({ search, searchedMusic, addedMusic, isLoading, token, isEditingTo
 
     <div class="search">
       <div class="search__bar">
-        <input type="text" class="search__bar__input" placeholder="Search for music..." spellcheck={false}
-               autofocus="true"
+        <input type="text" class="search__bar__input" placeholder="Search for music..." autofocus="true"
                oninput={e => searchCallback(e.target.value, actions)}/>
         <SearchIcon/>
       </div>
@@ -123,7 +141,7 @@ const view = ({ search, searchedMusic, addedMusic, isLoading, token, isEditingTo
         {addedMusic.map(({ name, artists, duration, isPlaying }, index) => (
           <li class="selected-list__item" key={index}>
             <span class="selected-list__item__name">{name}</span>
-            {isPlaying ? <PlayIcon/> : undefined}
+            {isPlaying && <PlayIcon/>}
             <span class="selected-list__item__artists">{artists[0]}</span>
             <span class="selected-list__item__duration">{formatDuration(duration)}</span>
           </li>
@@ -136,7 +154,7 @@ const view = ({ search, searchedMusic, addedMusic, isLoading, token, isEditingTo
 const main = app(state, actions, view, document.getElementById('root'));
 
 const amqRequestTopic = 'topic://suggestionRequestTopic';
-const amqResponseQueue = 'queue://trackRequestQueue';
+const amqResponseQueue = 'queue://suggestionResponseQueue';
 
 amq.init({
   uri: 'http://localhost:8080/amq',
@@ -144,8 +162,9 @@ amq.init({
   timeout: 2000
 });
 
-const handleTrackResponse = ({ textContent }) => {
-  const track = JSON.parse(textContent);
+const handleTrackResponse = (message) => {
+  console.log({ message });
+  const track = JSON.parse(message.textContent);
   console.log('Message Response: ', track);
   main.setTrackToIsPlaying(track.uri);
 };

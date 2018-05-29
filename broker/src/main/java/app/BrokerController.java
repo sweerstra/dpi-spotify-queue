@@ -14,22 +14,35 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
-public class BrokerController extends BrokerClientAppGateway implements Initializable {
+public class BrokerController implements Initializable {
     public TableView<TrackRequest> tvTracks;
     public TableColumn<TrackRequest, String> tcName;
     public TableColumn<TrackRequest, String> tcArtists;
     public TableColumn<TrackRequest, Integer> tcDuration;
 
+    private BrokerClientAppGateway clientAppGateway;
+    private BrokerMediatorAppGateway mediatorAppGateway;
     private ObservableList<TrackRequest> trackRequests;
     private List<TrackRequest> tracks;
 
     public BrokerController() {
-        tracks = new ArrayList<>();
-    }
+        clientAppGateway = new BrokerClientAppGateway() {
+            @Override
+            protected void receiveSuggestionRequest(TrackRequest track) {
+                trackRequests.add(track);
+                // System.out.println("Suggestion Request, with Ajax");
+            }
+        };
 
-    @Override
-    protected void receiveTrackRequest(TrackRequest trackRequest) {
-        trackRequests.add(trackRequest);
+        mediatorAppGateway = new BrokerMediatorAppGateway() {
+            @Override
+            protected void receiveTrackResponse(String trackJson) {
+                System.out.println("Track Response, from Node.js");
+                System.out.println(trackJson);
+            }
+        };
+
+        tracks = new ArrayList<>();
     }
 
     @Override
@@ -46,7 +59,7 @@ public class BrokerController extends BrokerClientAppGateway implements Initiali
         TrackRequest trackRequest = tvTracks.getSelectionModel().getSelectedItem();
 
         if (trackRequest != null) {
-            this.sendMessage(trackRequest);
+            this.mediatorAppGateway.sendMessage(trackRequest);
         }
     }
 }

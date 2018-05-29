@@ -6,7 +6,7 @@ import models.TrackRequest;
 
 public abstract class BrokerClientAppGateway extends Gateway {
     public BrokerClientAppGateway() {
-        super("trackRequestQueue", SessionType.Queue, "suggestionRequestTopic", SessionType.Topic);
+        super("suggestionResponseQueue", SessionType.Queue, "suggestionRequestTopic", SessionType.Topic);
     }
 
     public void sendMessage(TrackRequest track) {
@@ -17,8 +17,8 @@ public abstract class BrokerClientAppGateway extends Gateway {
     @Override
     public void receiveMessage(String json, String correlationId) {
         TrackRequest track = this.gson.fromJson(json, TrackRequest.class);
-        receiveTrackRequest(track);
+        receiveSuggestionRequest(track);
     }
 
-    protected abstract void receiveTrackRequest(TrackRequest track);
+    protected abstract void receiveSuggestionRequest(TrackRequest track);
 }
