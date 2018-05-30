@@ -101,7 +101,10 @@ const view = ({ search, searchedMusic, addedMusic, isLoading }, actions) => (
     <nav>
       <h1>Spotify Queue Client</h1>
       <div>
-        <a href="#">View Queue</a>
+        <a href="#">View Broker</a>
+      </div>
+      <div>
+        <a href="http://localhost:8082/authorize" target="_blank">Access Mediator</a>
       </div>
     </nav>
 

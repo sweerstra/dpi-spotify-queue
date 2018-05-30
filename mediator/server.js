@@ -15,13 +15,37 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/login', function (req, res) {
-    const scopes = encodeURIComponent('user-modify-playback-state');
-    const redirectUri = 'http://localhost:8081';
+app.get('/authorize', (req, res) => {
+    const scope = encodeURIComponent('user-modify-playback-state');
+    const redirectUri = 'http://localhost:8082/callback';
     const clientId = process.env.SPOTIFY_CLIENT_ID;
 
     res.redirect(`https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}` +
-        `&scope=${scopes}&redirect_uri=${redirectUri}`);
+        `&scope=${scope}&state=mediator&redirect_uri=${redirectUri}`);
+});
+
+app.get('/callback', (req, res) => {
+    const { code, state, error } = req.query;
+
+    if (code && state === 'mediator') {
+        res.json({ code });
+    } else if (error) {
+        console.log(error);
+    }
+});
+
+app.get('/token/:code', (req, res) => {
+    const { code } = req.params;
+
+    const redirectUri = 'http://localhost:8082/callback';
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+
+    SpotifyService.getToken(code, redirectUri, clientId, clientSecret)
+        .then(data => {
+            SpotifyService.setAccessToken(data.access_token);
+            res.json(data);
+        });
 });
 
 const requestDestination = '/queue/trackRequestQueue';
@@ -34,13 +58,11 @@ client.connect(sessionId => {
 
     // incoming messages should be played by the spotify service
     client.subscribe(requestDestination, (body, headers) => {
-        console.log({ headers });
-
-        SpotifyService.playTrack(body)
+        SpotifyService.playTracks(JSON.parse(body))
             .then(() => {
-                console.log('send back', body);
                 client.publish(responseDestination, body);
-            });
+            })
+            .catch(err => console.log(err));
     });
 });
 

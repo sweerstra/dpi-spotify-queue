@@ -13,6 +13,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class BrokerController implements Initializable {
     public TableView<TrackRequest> tvTracks;
@@ -61,5 +62,13 @@ public class BrokerController implements Initializable {
         if (trackRequest != null) {
             this.mediatorAppGateway.sendMessage(trackRequest);
         }
+    }
+
+    public void btnPlayTracksClick(ActionEvent actionEvent) {
+        List<String> uris = trackRequests.stream()
+                .map(TrackRequest::getUri)
+                .collect(Collectors.toList());
+
+        mediatorAppGateway.sendMessage(uris);
     }
 }
