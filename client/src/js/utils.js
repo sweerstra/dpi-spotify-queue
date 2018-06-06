@@ -27,3 +27,10 @@ export const getUrlHashParams = (url) => {
     return null;
   }
 };
+
+export const formatDuration = (durationInMilliseconds) => {
+  const seconds = durationInMilliseconds / 1000;
+  const minutes = Math.floor(seconds / 60);
+  const remainderSeconds = Math.round(seconds % 60);
+  return `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
+};

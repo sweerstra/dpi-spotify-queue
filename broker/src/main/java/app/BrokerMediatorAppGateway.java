@@ -23,9 +23,9 @@ public abstract class BrokerMediatorAppGateway extends Gateway {
 
     @Override
     public void receiveMessage(String trackJson, String correlationId) {
-        // TrackRequest track = this.gson.fromJson(json, TrackRequest.class);
+        // TrackRequest track = this.gson.fromJson(trackJson, TrackRequest.class);
         receiveTrackResponse(trackJson);
     }
 
-    protected abstract void receiveTrackResponse(String track);
+    protected abstract void receiveTrackResponse(String trackJson);
 }

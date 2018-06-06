@@ -9,9 +9,9 @@ public abstract class BrokerClientAppGateway extends Gateway {
         super("suggestionResponseQueue", SessionType.Queue, "suggestionRequestTopic", SessionType.Topic);
     }
 
-    public void sendMessage(TrackRequest track) {
-        String json = this.gson.toJson(track);
-        this.messageSender.send(json, "");
+    public void sendMessage(String tracksJson) {
+        // String json = this.gson.toJson(track);
+        this.messageSender.send(tracksJson, "4");
     }
 
     @Override

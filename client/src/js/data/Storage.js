@@ -15,6 +15,12 @@ const Storage = {
     const now = Date.now() / 1000;
 
     return expiring && parseFloat(expiring) < now;
+  },
+  setGroup(group) {
+    localStorage.setItem('group', group);
+  },
+  getGroup() {
+    return localStorage.getItem('group');
   }
 };
 

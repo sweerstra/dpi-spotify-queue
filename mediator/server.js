@@ -63,6 +63,8 @@ client.connect(sessionId => {
                 client.publish(responseDestination, body);
             })
             .catch(err => console.log(err));
+        console.log('Message received: ', body);
+        client.publish(responseDestination, body);
     });
 });
 

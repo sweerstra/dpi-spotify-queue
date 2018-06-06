@@ -1,5 +1,5 @@
 import { h } from 'hyperapp';
-import './loader.css';
+import './Loader.css';
 
 const Loader = () => (
   <div class="loader">
