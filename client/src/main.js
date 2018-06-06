@@ -59,9 +59,10 @@ const state = {
 
 const actions = {
   setSearchedMusic: searchedMusic => state => ({ searchedMusic }),
-  addToQueue: track => {
+  addToQueue: track => state => {
     const stringified = JSON.stringify(track);
-    amq.sendMessage(amqRequestTopic, stringified);
+    console.log(`Send to topic://${state.selectedGroup}.suggestionRequestTopic`);
+    amq.sendMessage(`topic://${state.selectedGroup}.suggestionRequestTopic`, stringified);
     console.log(stringified);
   },
   addTrack: track => state => ({ queuedTracks: [...state.queuedTracks, track] }),
@@ -141,6 +142,12 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
               Storage.setGroup(group);
               actions.setSelectedGroup(group);
               actions.setIsModalOpen(false);
+
+              amq.addListener('request', `topic://${group}.suggestionRequestTopic`, (message) => {
+                const track = JSON.parse(message.textContent);
+                console.log('Incoming track', track);
+                main.addTrack(track);
+              });
             }}>
         <h2>Spotify Queue Group</h2>
         <p>
@@ -156,19 +163,23 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
 
 const main = app(state, actions, view, document.getElementById('root'));
 
-const amqRequestTopic = 'topic://suggestionRequestTopic';
-const amqResponseQueue = 'topic://suggestionRequestTopic';
-
 amq.init({
   uri: 'http://localhost:8080/amq',
   logging: true,
   timeout: 2000
 });
 
-const handleTrackResponse = (message) => {
-  const track = JSON.parse(message.textContent);
-  console.log('Incoming track', track);
-  main.addTrack(track);
-};
+if (state.selectedGroup) {
+  console.log(`Set listener topic://${state.selectedGroup}.suggestionRequestTopic`);
 
-amq.addListener('id', amqResponseQueue, handleTrackResponse);
+  amq.addListener('request', `topic://${state.selectedGroup}.suggestionRequestTopic`, (message) => {
+    const track = JSON.parse(message.textContent);
+    console.log('Incoming track', track);
+    main.addTrack(track);
+  });
+}
+
+amq.addListener('response', 'queue://suggestionResponseQueue', (message) => {
+  const response = JSON.parse(message.textContent);
+  console.log({ response });
+});
