@@ -49,7 +49,6 @@ app.get('/token/:code', (req, res) => {
 });
 
 const requestDestination = '/queue/trackRequestQueue';
-const responseDestination = '/queue/trackResponseQueue';
 
 const client = new Stomp('127.0.0.1', 61613, 'admin', 'admin');
 
@@ -58,13 +57,13 @@ client.connect(sessionId => {
 
     // incoming messages should be played by the spotify service
     client.subscribe(requestDestination, (body, headers) => {
+        console.log(body, headers);
         SpotifyService.playTracks(JSON.parse(body))
             .then(() => {
-                client.publish(responseDestination, body);
+                const group = headers['correlation-id'];
+                client.publish(`/topic/${group}.trackResponseTopic`, body);
             })
             .catch(err => console.log(err));
-        console.log('Message received: ', body);
-        client.publish(responseDestination, body);
     });
 });
 

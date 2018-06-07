@@ -143,11 +143,7 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
               actions.setSelectedGroup(group);
               actions.setIsModalOpen(false);
 
-              amq.addListener('request', `topic://${group}.suggestionRequestTopic`, (message) => {
-                const track = JSON.parse(message.textContent);
-                console.log('Incoming track', track);
-                main.addTrack(track);
-              });
+              setListeners(group);
             }}>
         <h2>Spotify Queue Group</h2>
         <p>
@@ -169,17 +165,26 @@ amq.init({
   timeout: 2000
 });
 
-if (state.selectedGroup) {
-  console.log(`Set listener topic://${state.selectedGroup}.suggestionRequestTopic`);
+const { selectedGroup } = state;
 
-  amq.addListener('request', `topic://${state.selectedGroup}.suggestionRequestTopic`, (message) => {
-    const track = JSON.parse(message.textContent);
-    console.log('Incoming track', track);
-    main.addTrack(track);
-  });
-}
+const setListeners = (group) => {
+  if (group) {
+    console.log(`Set listener topic://${group}.suggestionRequestTopic`);
 
-amq.addListener('response', 'queue://suggestionResponseQueue', (message) => {
-  const response = JSON.parse(message.textContent);
-  console.log({ response });
-});
+    amq.addListener('request', `topic://${group}.suggestionRequestTopic`, (message) => {
+      const track = JSON.parse(message.textContent);
+      console.log('Incoming track', track);
+      main.addTrack(track);
+    });
+
+    console.log(`Set listener topic://${group}.suggestionResponseTopic`);
+
+    amq.addListener('response', `topic://${group}.suggestionResponseTopic`, (message) => {
+      const response = JSON.parse(message.textContent);
+      console.log({ response }, ' is playing');
+    });
+  }
+};
+
+setListeners(selectedGroup);
+

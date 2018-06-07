@@ -13,10 +13,9 @@ public class BrokerApplication extends Application {
 
     @Override
     public void start(final Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Broker.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/broker.fxml"));
         Parent root = loader.load();
 
-        //Now we have access to getController() through the instance... don't forget the type cast
         BrokerController controller = loader.getController();
 
         Scene scene = new Scene(root);

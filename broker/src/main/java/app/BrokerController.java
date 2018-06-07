@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import models.TrackRequest;
 
@@ -20,30 +21,15 @@ public class BrokerController implements Initializable {
     public TableColumn<TrackRequest, String> tcName;
     public TableColumn<TrackRequest, String> tcArtists;
     public TableColumn<TrackRequest, Integer> tcDuration;
+    public TextField tfGroup;
 
     private BrokerClientAppGateway clientAppGateway;
     private BrokerMediatorAppGateway mediatorAppGateway;
     private ObservableList<TrackRequest> trackRequests;
     private List<TrackRequest> tracks;
+    private String groupName;
 
     public BrokerController() {
-        clientAppGateway = new BrokerClientAppGateway() {
-            @Override
-            protected void receiveSuggestionRequest(TrackRequest track) {
-                trackRequests.add(track);
-                System.out.println("Suggestion Request, with Ajax");
-            }
-        };
-
-        mediatorAppGateway = new BrokerMediatorAppGateway() {
-            @Override
-            protected void receiveTrackResponse(String tracksJson) {
-                clientAppGateway.sendMessage(tracksJson);
-                System.out.println("Track Response, from Node.js");
-                System.out.println(tracksJson);
-            }
-        };
-
         tracks = new ArrayList<>();
     }
 
@@ -70,6 +56,32 @@ public class BrokerController implements Initializable {
                 .map(TrackRequest::getUri)
                 .collect(Collectors.toList());
 
-        mediatorAppGateway.sendMessage(uris);
+        mediatorAppGateway.sendMessage(uris, groupName);
+    }
+
+    public void btnSetGroupClick(ActionEvent actionEvent) {
+        String group = tfGroup.getText();
+
+        if (!group.isEmpty()) {
+            groupName = group;
+
+            clientAppGateway = new BrokerClientAppGateway(groupName) {
+                @Override
+                protected void receiveSuggestionRequest(TrackRequest track) {
+                    trackRequests.add(track);
+
+                    System.out.println("Suggestion Request, with Ajax");
+                }
+            };
+
+            mediatorAppGateway = new BrokerMediatorAppGateway(groupName) {
+                @Override
+                protected void receiveTrackResponse(String tracksJson) {
+                    clientAppGateway.sendMessage(tracksJson);
+                    System.out.println("Track Response, from Node.js");
+                    System.out.println(tracksJson);
+                }
+            };
+        }
     }
 }

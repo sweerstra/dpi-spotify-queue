@@ -14,7 +14,7 @@ const queueNameCreator = name => {
 const Queue = ({ name, tracks }) => (
   <div class="queue">
     <div class="queue__heading">
-      {queueNameCreator(name)} Queue
+      {name && queueNameCreator(name)} Queue
       <ClockIcon/>
     </div>
     <ul class="queue__items">
