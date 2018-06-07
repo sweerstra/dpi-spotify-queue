@@ -16,7 +16,8 @@
   align-items: center;
 }
 
-.feather-clock {
+.feather-clock,
+.feather-play {
   stroke: var(--color-tint);
   margin-left: auto;
 }
@@ -50,6 +51,17 @@
 .queue__item__duration {
   margin-left: 20px;
   font-style: italic;
+}
+
+/* Flickering */
+@keyframes flickerAnimation {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animate-flicker {
+  animation: flickerAnimation 1.5s infinite;
 }
 
 @media (max-width: 992px) {

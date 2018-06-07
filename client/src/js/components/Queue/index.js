@@ -11,17 +11,17 @@ const queueNameCreator = name => {
   return name + suffix;
 };
 
-const Queue = ({ name, tracks }) => (
+const Queue = ({ name, tracks, isPlaying }) => (
   <div class="queue">
     <div class="queue__heading">
       {name && queueNameCreator(name)} Queue
+      {isPlaying && <PlayIcon className={isPlaying ? 'animate-flicker' : ''}/>}
       <ClockIcon/>
     </div>
     <ul class="queue__items">
-      {tracks.map(({ name, artists, duration, isPlaying }, index) => (
+      {tracks.map(({ name, artists, duration }, index) => (
         <li class="queue__item" key={index}>
           <span class="queue__item__name">{name}</span>
-          {isPlaying && <PlayIcon/>}
           <span class="queue__item__artists">{artists[0]}</span>
           <span class="queue__item__duration">{formatDuration(duration)}</span>
         </li>

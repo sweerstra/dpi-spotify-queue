@@ -54,7 +54,8 @@ const state = {
   queuedTracks: [],
   isLoading: false,
   isModalOpen: !Storage.getGroup(),
-  selectedGroup: Storage.getGroup()
+  selectedGroup: Storage.getGroup(),
+  isPlaying: false
 };
 
 const actions = {
@@ -68,7 +69,8 @@ const actions = {
   addTrack: track => state => ({ queuedTracks: [...state.queuedTracks, track] }),
   setLoading: isLoading => state => ({ isLoading }),
   setIsModalOpen: isModalOpen => state => ({ isModalOpen }),
-  setSelectedGroup: selectedGroup => state => ({ selectedGroup })
+  setSelectedGroup: selectedGroup => state => ({ selectedGroup }),
+  setIsPlaying: isPlaying => state => ({ isPlaying })
 };
 
 const getMusic = (value, actions) => {
@@ -89,7 +91,7 @@ const getMusic = (value, actions) => {
 
 const searchCallback = debounce((value, actions) => getMusic(value, actions), 500);
 
-const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGroup }, actions) => (
+const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGroup, isPlaying }, actions) => (
   <div>
     <div class={`container ${isModalOpen ? 'modal__overlay' : ''}`}>
       <nav>
@@ -129,7 +131,9 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
           <Loader/>
         </div>}
       </div>
-      <Queue name={selectedGroup} tracks={queuedTracks}/>
+      <Queue name={selectedGroup}
+             tracks={queuedTracks}
+             isPlaying={isPlaying}/>
     </div>
     <Modal isOpen={isModalOpen}
            closable={selectedGroup}
@@ -181,6 +185,7 @@ const setListeners = (group) => {
 
     amq.addListener('response', `topic://${group}.suggestionResponseTopic`, (message) => {
       const response = JSON.parse(message.textContent);
+      main.setIsPlaying(true);
       console.log({ response }, ' is playing');
     });
   }
