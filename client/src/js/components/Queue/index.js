@@ -11,11 +11,11 @@ const queueNameCreator = name => {
   return name + suffix;
 };
 
-const Queue = ({ name, tracks, isPlaying }) => (
+const Queue = ({ name, tracks, isPlaying, onPlay }) => (
   <div class="queue">
     <div class="queue__heading">
       {name && queueNameCreator(name)} Queue
-      {isPlaying && <PlayIcon className={isPlaying ? 'animate-flicker' : ''}/>}
+      <PlayIcon className={isPlaying ? 'animate-flicker' : ''} onclick={onPlay}/>
       <ClockIcon/>
     </div>
     <ul class="queue__items">

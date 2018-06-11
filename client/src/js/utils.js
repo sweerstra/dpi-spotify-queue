@@ -8,24 +8,24 @@ export const debounce = (fn, time) => {
   };
 };
 
-export const getUrlHashParams = (url) => {
-  try {
-    const { hash } = new URL(url);
+export const getUrlParams = (url) => {
+  const queryIndex = url.indexOf('?') + 1;
+  const hashIndex = url.indexOf('#') + 1;
 
-    if (!hash) {
-      return;
-    }
+  let index = 0;
 
-    return hash.slice(1)
-      .split('&')
-      .reduce((obj, pair) => {
-        const [key, value] = pair.split('=');
-        obj[key] = value;
-        return obj;
-      }, {});
-  } catch (e) {
+  if (queryIndex !== 0) index = queryIndex;
+  else if (hashIndex !== 0) index = hashIndex;
+
+  if (index === 0) {
     return null;
   }
+
+  return url.slice(index).split('&')
+    .reduce((params, hash) => {
+      const [key, value] = hash.split('=');
+      return { ...params, [key]: value };
+    }, {});
 };
 
 export const formatDuration = (durationInMilliseconds) => {

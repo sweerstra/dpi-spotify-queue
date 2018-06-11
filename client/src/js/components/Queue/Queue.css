@@ -12,14 +12,25 @@
   border-radius: 4px;
   font-size: 1.4em;
   font-weight: bold;
-  display: flex;
+  display: grid;
   align-items: center;
+  grid-template-columns: 1fr;
+  grid-gap: 20px;
+  grid-auto-flow: column;
 }
 
 .feather-clock,
 .feather-play {
   stroke: var(--color-tint);
-  margin-left: auto;
+  stroke-width: 2;
+}
+
+.feather-play {
+  cursor: pointer;
+}
+
+.feather-play:hover {
+  fill: var(--color-tint);
 }
 
 .queue__items {

@@ -1,15 +1,25 @@
 import { h, app } from 'hyperapp';
 import './css/style.css';
-import { SearchIcon } from './js/icons';
-import { debounce, getUrlHashParams, formatDuration } from './js/utils';
+import { GithubIcon, SearchIcon } from './js/icons';
+import { debounce, getUrlParams, formatDuration } from './js/utils';
 import Storage from './js/data/Storage';
 import Api from './js/data/Api';
-import org from './vendor/amq';
 import Loader from './js/components/Loader';
 import Modal from './js/components/Modal';
 import Queue from './js/components/Queue';
 
-const amq = org.activemq.Amq;
+// set up firebase with database
+import firebase from 'firebase/app';
+import 'firebase/database';
+
+const config = {
+  authDomain: "dpi-spotify.firebaseapp.com",
+  databaseURL: "https://dpi-spotify.firebaseio.com"
+};
+
+const database = firebase
+  .initializeApp(config)
+  .database();
 
 document.addEventListener('DOMContentLoaded', () => {
   const storedToken = Storage.getToken();
@@ -19,35 +29,26 @@ document.addEventListener('DOMContentLoaded', () => {
   if (storedToken) {
     if (isExpiredToken) {
       Storage.removeToken();
-      redirectToSpotifyAuthorization();
+      Api.redirectToSpotifyAuthorization();
     }
 
     return;
   }
 
-  const params = getUrlHashParams(window.location.href);
+  const params = getUrlParams(window.location.href);
 
   // check if url contains authentication token and correct state
   if (params) {
-    const { access_token, state, expires_in } = params;
+    const { state, access_token, expires_in } = params;
 
-    if (access_token && state === 'client') {
+    if (access_token && (state === 'token' || state === 'device')) {
       Storage.setToken(`Bearer ${access_token}`, parseFloat(expires_in));
       return;
     }
   }
 
-  redirectToSpotifyAuthorization();
+  Api.redirectToSpotifyAuthorization();
 });
-
-const redirectToSpotifyAuthorization = () => {
-  const clientId = '5d155fde6d184e87bdb4be4639ee0aab';
-  const redirectUri = 'http://localhost:8081';
-  const spotifyUrl = 'https://accounts.spotify.com/authorize?response_type=token&' +
-    `client_id=${clientId}&state=client&redirect_uri=${redirectUri}`;
-
-  window.location.replace(spotifyUrl);
-};
 
 const state = {
   searchedMusic: null,
@@ -61,12 +62,13 @@ const state = {
 const actions = {
   setSearchedMusic: searchedMusic => state => ({ searchedMusic }),
   addToQueue: track => state => {
-    const stringified = JSON.stringify(track);
-    console.log(`Send to topic://${state.selectedGroup}.suggestionRequestTopic`);
-    amq.sendMessage(`topic://${state.selectedGroup}.suggestionRequestTopic`, stringified);
-    console.log(stringified);
+    database
+      .ref(state.selectedGroup)
+      .push(track, response => response);
+
+    console.log(JSON.stringify(track));
   },
-  addTrack: track => state => ({ queuedTracks: [...state.queuedTracks, track] }),
+  setTracks: queuedTracks => state => ({ queuedTracks }),
   setLoading: isLoading => state => ({ isLoading }),
   setIsModalOpen: isModalOpen => state => ({ isModalOpen }),
   setSelectedGroup: selectedGroup => state => ({ selectedGroup }),
@@ -84,9 +86,20 @@ const getMusic = (value, actions) => {
     .then(music => actions.setSearchedMusic(music.tracks.items))
     .catch(() => {
       Storage.removeToken();
-      redirectToSpotifyAuthorization();
+      Api.redirectToSpotifyAuthorization();
     })
     .then(() => actions.setLoading(false));
+};
+
+const playMusic = (uris, actions) => {
+  if (!uris || uris.length === 0) {
+    alert('There are no tracks in the queue to play.');
+    return;
+  }
+
+  Api.playSpotifyTracks(uris, Storage.getToken())
+    .then(() => actions.setIsPlaying(true))
+    .catch(() => alert('You are not authorized to control this playback.'));
 };
 
 const searchCallback = debounce((value, actions) => getMusic(value, actions), 500);
@@ -96,12 +109,10 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
     <div class={`container ${isModalOpen ? 'modal__overlay' : ''}`}>
       <nav>
         <h1>Spotify Queue Client</h1>
-        <div>
-          <a href="#">View Broker</a>
-        </div>
-        <div>
-          <a href="http://localhost:8082/authorize" target="_blank">Set Control Device</a>
-        </div>
+        <a href="https://github.com/sweerstra/dpi-spotify-queue/tree/firebase" target="_blank">
+          <GithubIcon/>
+        </a>
+        <button onclick={() => Api.redirectToSpotifyAuthorization(true)} class="light">Login To Device</button>
         <button onclick={() => actions.setIsModalOpen(true)}>{selectedGroup}</button>
       </nav>
 
@@ -133,7 +144,12 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
       </div>
       <Queue name={selectedGroup}
              tracks={queuedTracks}
-             isPlaying={isPlaying}/>
+             isPlaying={isPlaying}
+             onPlay={() => {
+               const uris = queuedTracks.map(track => track.uri);
+               console.log({ uris });
+               playMusic(uris, actions);
+             }}/>
     </div>
     <Modal isOpen={isModalOpen}
            closable={selectedGroup}
@@ -142,12 +158,18 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
             onsubmit={e => {
               e.preventDefault();
 
+              const oldGroup = Storage.getGroup();
+
+              if (oldGroup) {
+                removeTrackListener(oldGroup);
+              }
+
               const group = e.target.group.value;
               Storage.setGroup(group);
               actions.setSelectedGroup(group);
               actions.setIsModalOpen(false);
 
-              setListeners(group);
+              setTrackListener(group);
             }}>
         <h2>Spotify Queue Group</h2>
         <p>
@@ -163,33 +185,28 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
 
 const main = app(state, actions, view, document.getElementById('root'));
 
-amq.init({
-  uri: 'http://localhost:8080/amq',
-  logging: true,
-  timeout: 2000
-});
-
-const { selectedGroup } = state;
-
-const setListeners = (group) => {
+const setTrackListener = (group) => {
   if (group) {
-    console.log(`Set listener topic://${group}.suggestionRequestTopic`);
+    database
+      .ref(group)
+      .on('value', snapshot => {
+        const val = snapshot.val();
 
-    amq.addListener('request', `topic://${group}.suggestionRequestTopic`, (message) => {
-      const track = JSON.parse(message.textContent);
-      console.log('Incoming track', track);
-      main.addTrack(track);
-    });
+        const tracks = val
+          ? Object.values(val)
+          : [];
 
-    console.log(`Set listener topic://${group}.suggestionResponseTopic`);
-
-    amq.addListener('response', `topic://${group}.suggestionResponseTopic`, (message) => {
-      const response = JSON.parse(message.textContent);
-      main.setIsPlaying(true);
-      console.log({ response }, ' is playing');
-    });
+        main.setTracks(tracks);
+      });
   }
 };
 
-setListeners(selectedGroup);
+const removeTrackListener = (group) => {
+  database
+    .ref(group)
+    .off();
+};
 
+const { selectedGroup } = state;
+
+setTrackListener(selectedGroup);

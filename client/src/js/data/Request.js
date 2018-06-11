@@ -10,6 +10,13 @@ class Request {
     });
   }
 
+  put(url, data, token) {
+    return this._request(url, token, {
+      method: 'put',
+      body: JSON.stringify(data)
+    });
+  }
+
   _request(url, token, options = {}) {
     const headers = { ...options.headers, 'Content-Type': 'application/json' };
 
