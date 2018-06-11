@@ -149,9 +149,20 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
                const uris = queuedTracks.map(track => track.uri);
                console.log({ uris });
                playMusic(uris, actions);
+             }}
+             onRemoveTrack={({ id, name }) => {
+               const confirmedName = prompt(`Are you sure you want to delete "${name}" from the queue?`);
+
+               if (confirmedName === selectedGroup) {
+                 database
+                   .ref(selectedGroup)
+                   .child(id)
+                   .remove();
+               }
              }}/>
     </div>
-    <Modal isOpen={isModalOpen}
+    <Modal className="group-modal"
+           isOpen={isModalOpen}
            closable={selectedGroup}
            onModalCloseRequest={() => actions.setIsModalOpen(false)}>
       <form class="group-modal__content"
@@ -175,8 +186,8 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
         <p>
           This queue name will be used to add tracks to.
         </p>
-        <input type="text" class="input" value={selectedGroup} name="group" placeholder="name..." autofocus="true"
-               required/>
+        <input type="text" class="input"
+               value={selectedGroup} name="group" placeholder="name..." required/>
         <button class="btn">Confirm</button>
       </form>
     </Modal>
@@ -193,7 +204,7 @@ const setTrackListener = (group) => {
         const val = snapshot.val();
 
         const tracks = val
-          ? Object.values(val)
+          ? Object.entries(val).map(([id, obj]) => ({ id, ...obj }))
           : [];
 
         main.setTracks(tracks);

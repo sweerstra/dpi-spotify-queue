@@ -21,7 +21,7 @@ body {
 
 .container {
   display: grid;
-  grid-template-columns: 7fr 3fr;
+  grid-template-columns: 13fr 7fr;
   grid-template-rows: 80px 1fr;
   grid-template-areas: "nav nav" "search queue"
 }
@@ -214,22 +214,22 @@ a:hover {
 }
 
 /* Modal */
-.group-modal__content {
+.group-modal {
   --color-tint: var(--color-modal-tint);
   --color-main: var(--color-modal-main);
   --color-light-hover: var(--color-modal-tint-hover);
   padding: 20px;
 }
 
-.group-modal__content h2 {
+.group-modal h2 {
   margin-top: 10px;
 }
 
-.group-modal__content .input {
+.group-modal .input {
   margin-bottom: 20px;
 }
 
-.group-modal__content .btn {
+.group-modal .btn {
   position: absolute;
   bottom: 30px;
 }
@@ -254,3 +254,18 @@ a:hover {
     grid-template-areas: "nav" "search" "queue";
   }
 }
+
+@media (max-width: 600px) {
+  .modal.group-modal {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 6em;
+  }
+
+  .group-modal .btn {
+    position: inherit;
+  }
+}
+

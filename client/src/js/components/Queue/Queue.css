@@ -20,17 +20,20 @@
 }
 
 .feather-clock,
-.feather-play {
+.feather-play,
+.feather-x {
   stroke: var(--color-tint);
   stroke-width: 2;
 }
 
-.feather-play {
+.feather-play,
+.feather-x {
   cursor: pointer;
 }
 
-.feather-play:hover {
-  fill: var(--color-tint);
+.feather-play:hover,
+.feather-x:hover {
+  stroke-width: 3;
 }
 
 .queue__items {
@@ -44,23 +47,19 @@
   color: var(--color-tint);
   border: 2px solid var(--color-tint);
   border-radius: 4px;
-  display: flex;
+  display: grid;
   align-items: center;
-  justify-content: space-between;
+  grid-template-columns: 1fr;
+  grid-gap: 20px;
+  grid-auto-flow: column;
 }
 
 .queue__item__name {
   font-weight: bold;
-  margin-right: 10px;
-}
-
-.queue__item__artists {
-  margin-left: auto;
-  text-align: right;
+  display: block;
 }
 
 .queue__item__duration {
-  margin-left: 20px;
   font-style: italic;
 }
 
