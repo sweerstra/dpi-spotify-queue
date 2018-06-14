@@ -18,11 +18,10 @@ const Api = {
     return Request.put('https://api.spotify.com/v1/me/player/play', { uris }, token)
       .then(response => {
         return new Promise((resolve, reject) => {
-          console.log(response);
-          if (response.status === 401) {
-            reject({ error: 'Unauthorized' });
-          } else {
+          if (response.ok) {
             resolve({ isPlaying: true });
+          } else {
+            reject({ error: 'Unauthorized' });
           }
         });
       });

@@ -60,6 +60,11 @@ nav .feather:hover {
   stroke: var(--color-main);
 }
 
+nav .logged_in {
+  color: var(--color-main);
+  font-weight: bold;
+}
+
 .search {
   grid-area: search;
   margin-top: 40px;

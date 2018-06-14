@@ -11,12 +11,15 @@
   border: 3px solid var(--color-tint);
   border-radius: 4px;
   font-size: 1.4em;
-  font-weight: bold;
   display: grid;
   align-items: center;
   grid-template-columns: 1fr;
   grid-gap: 20px;
   grid-auto-flow: column;
+}
+
+.queue__heading__title {
+  font-weight: bold;
 }
 
 .feather-clock,

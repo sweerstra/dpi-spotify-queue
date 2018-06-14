@@ -30,8 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isExpiredToken) {
       Storage.removeToken();
       Api.redirectToSpotifyAuthorization();
+      return;
     }
 
+    history.replaceState('', '', '/');
     return;
   }
 
@@ -43,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (access_token && (state === 'token' || state === 'device')) {
       Storage.setToken(`Bearer ${access_token}`, parseFloat(expires_in));
+      history.replaceState('', '', '/');
       return;
     }
   }
@@ -77,6 +80,7 @@ const actions = {
 
 const getMusic = (value, actions) => {
   if (!value) {
+    actions.setSearchedMusic([]);
     return;
   }
 
@@ -99,7 +103,7 @@ const playMusic = (uris, actions) => {
 
   Api.playSpotifyTracks(uris, Storage.getToken())
     .then(() => actions.setIsPlaying(true))
-    .catch(() => alert('You are not authorized to control this playback.'));
+    .catch(() => alert('You are not authorized to use the current playback state.'));
 };
 
 const searchCallback = debounce((value, actions) => getMusic(value, actions), 500);
@@ -108,11 +112,11 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
   <div>
     <div class={`container ${isModalOpen ? 'modal__overlay' : ''}`}>
       <nav>
-        <h1>Spotify Queue Client</h1>
+        <h1>Spotify Queue</h1>
         <a href="https://github.com/sweerstra/dpi-spotify-queue/tree/firebase" target="_blank">
           <GithubIcon/>
         </a>
-        <button onclick={() => Api.redirectToSpotifyAuthorization(true)} class="light">Login To Device</button>
+        <button onclick={() => Api.redirectToSpotifyAuthorization(true)}>Control Playback</button>
         <button onclick={() => actions.setIsModalOpen(true)}>{selectedGroup}</button>
       </nav>
 
@@ -134,9 +138,6 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
               <span class="search-list__item__duration">{formatDuration(duration_ms)}</span>
             </li>;
           })}
-          {searchedMusic && searchedMusic.length === 0 && <div class="search-list__no-results">
-            No results found.
-          </div>}
         </ul>
         {isLoading && <div class="search__loader">
           <Loader/>
@@ -151,9 +152,7 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
                playMusic(uris, actions);
              }}
              onRemoveTrack={({ id, name }) => {
-               const confirmedName = prompt(`Are you sure you want to delete "${name}" from the queue?`);
-
-               if (confirmedName === selectedGroup) {
+               if (confirm(`Are you sure you want to delete "${name}" from the queue?`)) {
                  database
                    .ref(selectedGroup)
                    .child(id)
@@ -179,15 +178,14 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
               Storage.setGroup(group);
               actions.setSelectedGroup(group);
               actions.setIsModalOpen(false);
+              actions.setIsPlaying(false);
 
               setTrackListener(group);
             }}>
-        <h2>Spotify Queue Group</h2>
-        <p>
-          This queue name will be used to add tracks to.
-        </p>
+        <h2>Join an existing queue or create one</h2>
+        <p>Make sure you'll spread the word of your queue!</p>
         <input type="text" class="input"
-               value={selectedGroup} name="group" placeholder="name..." required/>
+               value={selectedGroup} name="group" placeholder="your queue name..." required/>
         <button class="btn">Confirm</button>
       </form>
     </Modal>
