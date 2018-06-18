@@ -21,6 +21,12 @@ const Storage = {
   },
   getGroup() {
     return localStorage.getItem('group');
+  },
+  setMainColor(color) {
+    localStorage.setItem('main-color', color);
+  },
+  getMainColor() {
+    return localStorage.getItem('main-color');
   }
 };
 

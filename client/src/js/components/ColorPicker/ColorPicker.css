@@ -1,0 +1,20 @@
+.color-picker {
+  height: 30px;
+}
+
+.color-picker:not(.color-picker--open) .color-picker__item {
+  display: none;
+}
+
+.color-picker__toggler {
+  cursor: pointer;
+}
+
+.color-picker__item {
+  width: 30px;
+  height: 30px;
+  margin-top: 4px;
+  border-radius: 50%;
+  border: 2px solid var(--color-tint);
+  cursor: pointer;
+}

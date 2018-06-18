@@ -7,6 +7,7 @@ import Api from './js/data/Api';
 import Loader from './js/components/Loader';
 import Modal from './js/components/Modal';
 import Queue from './js/components/Queue';
+import ColorPicker from './js/components/ColorPicker';
 
 // set up firebase with database
 import firebase from 'firebase/app';
@@ -22,6 +23,12 @@ const database = firebase
   .database();
 
 document.addEventListener('DOMContentLoaded', () => {
+  const mainColor = Storage.getMainColor();
+
+  if (mainColor) {
+    document.documentElement.style.setProperty('--color-main', mainColor);
+  }
+
   const storedToken = Storage.getToken();
   const isExpiredToken = Storage.hasExpiredToken();
 
@@ -59,7 +66,8 @@ const state = {
   isLoading: false,
   isModalOpen: !Storage.getGroup(),
   selectedGroup: Storage.getGroup(),
-  isPlaying: false
+  isPlaying: false,
+  isColorPickerOpen: false
 };
 
 const actions = {
@@ -75,7 +83,8 @@ const actions = {
   setLoading: isLoading => state => ({ isLoading }),
   setIsModalOpen: isModalOpen => state => ({ isModalOpen }),
   setSelectedGroup: selectedGroup => state => ({ selectedGroup }),
-  setIsPlaying: isPlaying => state => ({ isPlaying })
+  setIsPlaying: isPlaying => state => ({ isPlaying }),
+  setIsColorPickerOpen: isColorPickerOpen => state => ({ isColorPickerOpen })
 };
 
 const getMusic = (value, actions) => {
@@ -106,9 +115,14 @@ const playMusic = (uris, actions) => {
     .catch(() => alert('You are not authorized to use the current playback state.'));
 };
 
+const setMainColor = (color) => {
+  Storage.setMainColor(color);
+  document.documentElement.style.setProperty('--color-main', color);
+};
+
 const searchCallback = debounce((value, actions) => getMusic(value, actions), 500);
 
-const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGroup, isPlaying }, actions) => (
+const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGroup, isPlaying, isColorPickerOpen }, actions) => (
   <div>
     <div class={`container ${isModalOpen ? 'modal__overlay' : ''}`}>
       <nav>
@@ -116,6 +130,13 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
         <a href="https://github.com/sweerstra/dpi-spotify-queue/tree/firebase" target="_blank">
           <GithubIcon/>
         </a>
+        <ColorPicker isOpen={isColorPickerOpen}
+                     onToggle={() => actions.setIsColorPickerOpen(!isColorPickerOpen)}
+                     onSelectColor={color => {
+                       setMainColor(color);
+                       actions.setIsColorPickerOpen(false);
+                     }}
+                     onCreate={colorPicker => colorPickerRef = colorPicker}/>
         <button onclick={() => Api.redirectToSpotifyAuthorization(true)}>Control Playback</button>
         <button onclick={() => actions.setIsModalOpen(true)}>{selectedGroup}</button>
       </nav>
@@ -193,6 +214,14 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
 );
 
 const main = app(state, actions, view, document.getElementById('root'));
+
+let colorPickerRef;
+
+document.addEventListener('click', (e) => {
+  if (!colorPickerRef || !colorPickerRef.contains(e.target)) {
+    main.setIsColorPickerOpen(false);
+  }
+});
 
 const setTrackListener = (group) => {
   if (group) {
