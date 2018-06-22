@@ -27,11 +27,25 @@ const Api = {
       });
   },
 
-  redirectToSpotifyAuthorization(withScope) {
+  getCurrentlyPlayingTrack(token) {
+    return Request.get('https://api.spotify.com/v1/me/player/currently-playing', token)
+      .then(response => {
+        return new Promise((resolve, reject) => {
+          const jsonResp = response.json();
+          if (response.ok) {
+            resolve(jsonResp);
+          } else {
+            reject(jsonResp);
+          }
+        });
+      });
+  },
+
+  redirectToSpotifyAuthorization() {
     const clientId = '5d155fde6d184e87bdb4be4639ee0aab';
     const redirectUri = window.location.origin;
-    const state = withScope ? 'device' : 'token';
-    const scope = withScope ? 'scope=' + encodeURIComponent('user-modify-playback-state') : '';
+    const state = 'token';
+    const scope = 'scope=' + encodeURIComponent('user-modify-playback-state user-read-currently-playing');
     const spotifyUrl = 'https://accounts.spotify.com/authorize?response_type=token&' +
       `client_id=${clientId}&state=${state}&redirect_uri=${redirectUri}&${scope}`;
 

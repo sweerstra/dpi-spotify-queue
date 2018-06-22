@@ -1,8 +1,10 @@
 :root {
   --color-main: #1ed760;
-  --color-nav-main: #222327;
-  --color-tint: #222327;
-  --color-light: #F2F2F5;
+  --color-tint: #2F3034;
+  --color-main-alpha-1: rgba(0, 0, 0, 0.1);
+  --color-main-alpha-2: rgba(0, 0, 0, 0.15);
+  --color-main-alpha-3: rgba(0, 0, 0, 0.2);
+  --color-light: #f2f2f2;
   --color-light-hover: #e1e0e5;
   --color-modal-main: var(--color-tint);
   --color-modal-main-hover: var(--color-light-hover);
@@ -21,9 +23,11 @@ body {
 }
 
 .container {
+  height: 100vh;
   display: grid;
-  grid-template-columns: 13fr 7fr;
+  grid-template-columns: 6fr 4fr;
   grid-template-rows: 80px 1fr;
+  grid-column-gap: 40px;
   grid-template-areas: "nav nav" "search queue"
 }
 
@@ -31,8 +35,8 @@ nav {
   grid-area: nav;
   height: 100%;
   padding: 0 40px;
-  background-color: var(--color-nav-main);
-  color: white;
+  color: var(--color-tint);
+  background-color: var(--color-main-alpha-3);
   display: grid;
   grid-gap: 30px;
   grid-template-columns: 1fr;
@@ -43,10 +47,10 @@ nav {
 }
 
 nav button {
-  color: var(--color-light);
   padding: 0;
   font-size: 1em;
   font-weight: bold;
+  color: var(--color-tint);
   background: none;
   border: none;
   text-align: left;
@@ -54,11 +58,11 @@ nav button {
 }
 
 nav button:hover {
-  color: var(--color-main);
+  text-decoration: underline;
 }
 
 nav .feather:hover {
-  stroke: var(--color-main);
+  fill: var(--color-main);
 }
 
 nav .logged_in {
@@ -68,10 +72,12 @@ nav .logged_in {
 
 .search {
   grid-area: search;
-  margin-top: 40px;
+  padding-top: 40px;
+  padding-left: 40px;
 }
 
 .search__bar {
+  position: relative;
   display: flex;
   align-items: center;
 }
@@ -79,21 +85,19 @@ nav .logged_in {
 .search__bar__input {
   width: 100%;
   height: 80px;
-  margin-left: 30px;
-  padding: 20px 60px 20px 20px;
+  padding: 20px 20px 20px 90px;
   color: var(--color-tint);
-  background-color: transparent;
+  background-color: var(--color-main-alpha-1);
   border: 0;
   border-radius: 4px;
   font-size: 1.4em;
   font-weight: bold;
   outline: none;
-  box-shadow: inset 0 0 0 2px var(--color-tint);
   transition: box-shadow 420ms cubic-bezier(.165, .85, .45, 1);
 }
 
 .search__bar__input:focus {
-  box-shadow: inset 0 0 0 3px var(--color-tint);
+  background-color: var(--color-main-alpha-2);
 }
 
 .search__bar__input::placeholder {
@@ -101,9 +105,14 @@ nav .logged_in {
   font-weight: normal;
 }
 
+.feather-search {
+  position: absolute;
+  left: 30px;
+  stroke: var(--color-tint);
+}
+
 .search-list {
   grid-area: nav;
-  margin: 20px 30px;
   padding: 0;
   color: var(--color-tint);
   font-size: 1.2em;
@@ -112,8 +121,7 @@ nav .logged_in {
 
 .search-list__item {
   padding: 10px 20px;
-  margin-top: 6px;
-  border: 1px solid var(--color-tint);
+  margin-top: 10px;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -121,9 +129,13 @@ nav .logged_in {
 
 .search-list__item:hover,
 .search-list__item:active {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--color-main-alpha-1);
   transition: background linear 200ms;
   cursor: pointer;
+}
+
+.search-list__item:active {
+  background-color: var(--color-main-alpha-2);
 }
 
 .search-list__item__image {
@@ -163,18 +175,17 @@ nav .logged_in {
   display: block;
   padding: 10px;
   color: var(--color-light);
-  background-color: transparent;
+  background-color: var(--color-main-alpha-1);
   border: 0;
   border-radius: 4px;
   font-size: 1em;
   font-weight: bold;
   outline: none;
-  box-shadow: inset 0 0 0 1.5px var(--color-light);
   transition: box-shadow 420ms cubic-bezier(.165, .85, .45, 1);
 }
 
 .input:focus {
-  box-shadow: inset 0 0 0 2.5px var(--color-light);
+  background-color: var(--color-main-alpha-2);
 }
 
 .input::placeholder {
@@ -204,19 +215,13 @@ nav .logged_in {
 input:focus, button:focus { outline: none; }
 
 a {
-  color: white;
+  color: var(--color-tint);
   font-weight: bold;
   text-decoration: none;
 }
 
 a:hover {
   text-decoration: underline;
-}
-
-.feather-search {
-  position: relative;
-  right: 50px;
-  stroke: var(--color-tint);
 }
 
 /* Modal */
@@ -250,14 +255,17 @@ a:hover {
   nav a,
   nav button {
     font-size: 1.2em;
-    text-decoration: underline;
   }
 
   .container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 300px 1fr 1fr;
+    grid-template-rows: auto 1fr 1fr;
     grid-template-areas: "nav" "search" "queue";
+  }
+
+  .search {
+    padding: 40px;
   }
 }
 
@@ -271,7 +279,7 @@ a:hover {
   }
 
   .group-modal .btn {
-    position: inherit;
+    position: initial;
   }
 }
 

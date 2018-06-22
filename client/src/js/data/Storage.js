@@ -27,7 +27,13 @@ const Storage = {
   },
   getMainColor() {
     return localStorage.getItem('main-color');
-  }
+  },
+  setTintColor(color) {
+    localStorage.setItem('tint-color', color);
+  },
+  getTintColor(color) {
+    return localStorage.getItem('tint-color');
+  },
 };
 
 export default Storage;

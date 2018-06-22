@@ -24,9 +24,14 @@ const database = firebase
 
 document.addEventListener('DOMContentLoaded', () => {
   const mainColor = Storage.getMainColor();
+  const tintColor = Storage.getTintColor();
 
   if (mainColor) {
     document.documentElement.style.setProperty('--color-main', mainColor);
+  }
+
+  if (tintColor) {
+    document.documentElement.style.setProperty('--color-tint', tintColor);
   }
 
   const storedToken = Storage.getToken();
@@ -50,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (params) {
     const { state, access_token, expires_in } = params;
 
-    if (access_token && (state === 'token' || state === 'device')) {
+    if (access_token && state === 'token') {
       Storage.setToken(`Bearer ${access_token}`, parseFloat(expires_in));
       history.replaceState('', '', '/');
       return;
@@ -120,6 +125,11 @@ const setMainColor = (color) => {
   document.documentElement.style.setProperty('--color-main', color);
 };
 
+const setTintColor = (color) => {
+  Storage.setTintColor(color);
+  document.documentElement.style.setProperty('--color-tint', color);
+};
+
 const searchCallback = debounce((value, actions) => getMusic(value, actions), 500);
 
 const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGroup, isPlaying, isColorPickerOpen }, actions) => (
@@ -127,25 +137,28 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
     <div class={`container ${isModalOpen ? 'modal__overlay' : ''}`}>
       <nav>
         <h1>Spotify Queue</h1>
-        <a href="https://github.com/sweerstra/dpi-spotify-queue/tree/firebase" target="_blank">
-          <GithubIcon/>
-        </a>
         <ColorPicker isOpen={isColorPickerOpen}
                      onToggle={() => actions.setIsColorPickerOpen(!isColorPickerOpen)}
-                     onSelectColor={color => {
+                     onSelectBackgroundColor={color => {
                        setMainColor(color);
+                       actions.setIsColorPickerOpen(false);
+                     }}
+                     onSelectTextColor={color => {
+                       setTintColor(color);
                        actions.setIsColorPickerOpen(false);
                      }}
                      onCreate={colorPicker => colorPickerRef = colorPicker}/>
         <button onclick={() => Api.redirectToSpotifyAuthorization(true)}>Control Playback</button>
-        <button onclick={() => actions.setIsModalOpen(true)}>{selectedGroup}</button>
+        <a href="https://github.com/sweerstra/dpi-spotify-queue/tree/firebase" target="_blank">
+          <GithubIcon/>
+        </a>
       </nav>
 
       <div class="search">
         <div class="search__bar">
+          <SearchIcon/>
           <input type="text" class="search__bar__input" placeholder="Search for music..." autofocus="true"
                  oninput={e => searchCallback(e.target.value, actions)}/>
-          <SearchIcon/>
         </div>
         <ul class="search-list">
           {(searchedMusic && searchedMusic.length > 0) && searchedMusic.map(({ name, artists, album, duration_ms, uri }, index) => {
@@ -166,6 +179,7 @@ const view = ({ searchedMusic, queuedTracks, isLoading, isModalOpen, selectedGro
       </div>
       <Queue name={selectedGroup}
              tracks={queuedTracks}
+             onQueueEdit={() => actions.setIsModalOpen(true)}
              isPlaying={isPlaying}
              onPlay={() => {
                const uris = queuedTracks.map(track => track.uri);
@@ -248,3 +262,6 @@ const removeTrackListener = (group) => {
 const { selectedGroup } = state;
 
 setTrackListener(selectedGroup);
+
+/* Api.getCurrentlyPlayingTrack(Storage.getToken())
+  .then(json => console.log(json)); */

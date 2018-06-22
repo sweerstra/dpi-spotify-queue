@@ -9,12 +9,13 @@ export const SearchIcon = ({ onclick }) => (
   </svg>
 );
 
-export const ClockIcon = () => (
+export const ClockIcon = ({ title }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none"
        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
        class="feather feather-clock" color="#384047">
     <circle cx="12" cy="12" r="10"/>
     <polyline points="12 6 12 12 16 14"/>
+    <title>{title}</title>
   </svg>
 );
 
@@ -44,6 +45,7 @@ export const GithubIcon = () => (
        stroke-linejoin="round" aria-hidden="true" data-reactid="596">
     <path
       d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+    <title>View GitHub Source</title>
   </svg>
 );
 
@@ -58,8 +60,8 @@ export const RemoveIcon = ({ onclick }) => (
 );
 
 export const ColorPickerIcon = ({ className, onclick }) => (
-  <svg onclick={onclick} version="1.1" class={className} xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30"
-       height="30" viewBox="0 0 480 480" enable-background="new 0 0 480 480">
+  <svg onclick={onclick} version="1.1" class={className} xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="32"
+       height="32" viewBox="0 0 480 480" enable-background="new 0 0 480 480">
     <g id="cuts">
       <path fill="#900C3F" d="M70.298,70.291l84.853,84.853c14.673-14.672,33.132-25.554,53.78-31.074L177.867,8.138
 		C136.565,19.179,99.646,40.944,70.298,70.291z"/>
@@ -86,5 +88,25 @@ export const ColorPickerIcon = ({ className, onclick }) => (
       <path fill="#ADD45C" d="M409.703,409.709l-84.854-84.853c-14.674,14.672-33.131,25.554-53.781,31.073l31.064,115.932
 		C343.436,460.821,380.355,439.056,409.703,409.709z"/>
     </g>
+  </svg>
+);
+
+export const EditIcon = ({}) => (
+  <svg class="feather feather-edit" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+       stroke-linejoin="round" aria-hidden="true">
+    <polygon points="16 3 21 8 8 21 3 21 3 16 16 3"/>
+  </svg>
+);
+
+export const ShuffleIcon = ({}) => (
+  <svg class="feather feather-shuffle" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+       stroke-linejoin="round" aria-hidden="true">
+    <polyline points="16 3 21 3 21 8"/>
+    <line x1="4" y1="20" x2="21" y2="3"/>
+    <polyline points="21 16 21 21 16 21"/>
+    <line x1="15" y1="15" x2="21" y2="21"/>
+    <line x1="4" y1="4" x2="9" y2="9"/>
   </svg>
 );
