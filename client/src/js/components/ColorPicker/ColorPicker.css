@@ -40,6 +40,7 @@
 }
 
 .color-picker__item--custom .feather {
+  stroke: var(--color-tint);
   width: 18px;
   height: 18px;
 }

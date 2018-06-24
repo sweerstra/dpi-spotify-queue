@@ -1,15 +1,13 @@
 :root {
   --color-main: #1ed760;
   --color-tint: #2F3034;
+  --color-main-secondary: #2F3034;
+  --color-tint-secondary: var(--color-light);
   --color-main-alpha-1: rgba(0, 0, 0, 0.1);
   --color-main-alpha-2: rgba(0, 0, 0, 0.15);
   --color-main-alpha-3: rgba(0, 0, 0, 0.2);
   --color-light: #f2f2f2;
   --color-light-hover: #e1e0e5;
-  --color-modal-main: var(--color-tint);
-  --color-modal-main-hover: var(--color-light-hover);
-  --color-modal-tint: var(--color-light);
-  --color-modal-tint-hover: var(--color-light-hover);
 }
 
 * {
@@ -35,14 +33,14 @@ nav {
   grid-area: nav;
   height: 100%;
   padding: 0 40px;
-  color: var(--color-tint);
-  background-color: var(--color-main-alpha-3);
+  color: var(--color-light);
+  background-color: var(--color-main-secondary);
   display: grid;
-  grid-gap: 30px;
+  grid-gap: 40px;
   grid-template-columns: 1fr;
   grid-auto-flow: column;
   align-items: center;
-  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, .50);
+  box-shadow: 0 3px 10px 0 rgba(0, 0, 0, 0.5);
   z-index: 2;
 }
 
@@ -50,11 +48,21 @@ nav button {
   padding: 0;
   font-size: 1em;
   font-weight: bold;
-  color: var(--color-tint);
+  color: var(--color-light);
   background: none;
   border: none;
   text-align: left;
   cursor: pointer;
+}
+
+a {
+  color: var(--color-light);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 nav button:hover {
@@ -171,6 +179,29 @@ nav .logged_in {
   padding-top: 100px;
 }
 
+.with-tooltip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.with-tooltip:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  min-width: 110px;
+  top: 40px;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 4px;
+  color: var(--color-tint-secondary);
+  background: var(--color-main-secondary);
+  box-shadow: 0 2px 6px var(--color-main-secondary);
+  z-index: 4;
+}
+
 .input {
   display: block;
   padding: 10px;
@@ -214,21 +245,10 @@ nav .logged_in {
 
 input:focus, button:focus { outline: none; }
 
-a {
-  color: var(--color-tint);
-  font-weight: bold;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
 /* Modal */
 .group-modal {
-  --color-tint: var(--color-modal-tint);
-  --color-main: var(--color-modal-main);
-  --color-light-hover: var(--color-modal-tint-hover);
+  --color-tint: var(--color-tint-secondary);
+  --color-main: var(--color-main-secondary);
   padding: 20px;
 }
 
@@ -270,7 +290,7 @@ a:hover {
 }
 
 @media (max-width: 600px) {
-  .modal.group-modal {
+  .group-modal {
     height: 100%;
     display: flex;
     align-items: center;
@@ -278,7 +298,7 @@ a:hover {
     padding-bottom: 6em;
   }
 
-  .group-modal .btn {
+  .group-modal button {
     position: initial;
   }
 }

@@ -35,7 +35,6 @@ export const PlayIcon = ({ className, onclick }) => (
        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" class={`feather feather-play ${className}`}
        color="#384047">
     <polygon points="5 3 19 12 5 21 5 3"/>
-    <title>Play Tracks From Queue</title>
   </svg>
 );
 

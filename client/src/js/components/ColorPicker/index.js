@@ -17,10 +17,10 @@ const BackgroundColors = [
   '#009688'
 ];
 
-const TextColors = [
-  '#F2F2F5',
-  '#2F3034'
-];
+const TextColors = {
+  Light: '#F2F2F5',
+  Dark: '#2F3034'
+};
 
 const ColorPicker = ({ isOpen, onToggle, onSelectBackgroundColor, onSelectTextColor, onCreate }) => (
   <div class={isOpen ? 'color-picker color-picker--open' : 'color-picker'}
@@ -33,7 +33,8 @@ const ColorPicker = ({ isOpen, onToggle, onSelectBackgroundColor, onSelectTextCo
            style={{ backgroundColor: color }}
            onclick={() => onSelectBackgroundColor(color)}></div>
     )}
-    <div class="color-picker__item color-picker__item--custom"
+    <div class="color-picker__item color-picker__item--custom with-tooltip"
+         data-title="Pick Custom Hex Color"
          onclick={() => {
            const color = prompt('Pick a custom color');
 
@@ -43,12 +44,14 @@ const ColorPicker = ({ isOpen, onToggle, onSelectBackgroundColor, onSelectTextCo
          }}>
       <EditIcon/>
     </div>
-    <div class="color-picker__item color-picker__item--custom"
+    <div class="color-picker__item color-picker__item--custom with-tooltip"
+         data-title="Pick Random Color"
          onclick={() => onSelectBackgroundColor(getRandomColor())}>
       <ShuffleIcon/>
     </div>
-    {TextColors.map(color =>
-      <div class="color-picker__item color-picker__item--custom"
+    {Object.entries(TextColors).map(([key, color]) =>
+      <div class="color-picker__item color-picker__item--custom with-tooltip"
+           data-title={`Change Text Color To ${key}`}
            style={{ color }}
            onclick={() => onSelectTextColor(color)}>Aa</div>
     )}

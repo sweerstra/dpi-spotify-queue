@@ -1,5 +1,5 @@
 import { h, app } from 'hyperapp';
-import './css/style.css';
+import './css/main.css';
 import { GithubIcon, SearchIcon } from './js/icons';
 import { debounce, getUrlParams, formatDuration } from './js/utils';
 import Storage from './js/data/Storage';
@@ -262,6 +262,3 @@ const removeTrackListener = (group) => {
 const { selectedGroup } = state;
 
 setTrackListener(selectedGroup);
-
-/* Api.getCurrentlyPlayingTrack(Storage.getToken())
-  .then(json => console.log(json)); */

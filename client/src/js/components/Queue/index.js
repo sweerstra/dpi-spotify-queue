@@ -1,7 +1,7 @@
 import { h } from 'hyperapp';
 import './Queue.css';
 import { ClockIcon, PlayIcon, RemoveIcon } from '../../icons';
-import { formatDuration } from '../../utils';
+import { formatDurationWithAddedMilliseconds, formatDuration } from '../../utils';
 
 const queueNameCreator = name => {
   const endingLettersToSkip = 'sxz';
@@ -13,9 +13,9 @@ const queueNameCreator = name => {
 
 const Queue = ({ name, tracks, onQueueEdit, isPlaying, onPlay, onRemoveTrack }) => {
   const durationInMilliseconds = tracks.reduce((totalDuration, track) => totalDuration + track.duration, 0);
-  const currentDate = new Date();
-  currentDate.setSeconds(currentDate.getSeconds() + (durationInMilliseconds / 1000));
-  const musicUntilTimeString = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const musicUntilTimeString = formatDurationWithAddedMilliseconds(new Date(), durationInMilliseconds);
+  const durationString = formatDuration(durationInMilliseconds, false);
+  const clockTitle = `Music until ${musicUntilTimeString} (${durationString})`;
 
   return (
     <div class="queue">
@@ -23,7 +23,9 @@ const Queue = ({ name, tracks, onQueueEdit, isPlaying, onPlay, onRemoveTrack }) 
         <span class="queue__heading__title"
               onclick={onQueueEdit}>{name && queueNameCreator(name)} Queue</span>
         <PlayIcon className={isPlaying ? 'animate-flicker' : ''} onclick={onPlay}/>
-        <ClockIcon title={`Music until ${musicUntilTimeString}`}/>
+        <div class="with-tooltip" data-title={clockTitle}>
+          <ClockIcon/>
+        </div>
       </div>
       <ul class="queue__items">
         {tracks.map(({ name, artists, duration, id }, index) => (

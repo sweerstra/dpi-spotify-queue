@@ -1,6 +1,6 @@
 .modal {
-  color: var(--color-modal-tint);
-  background-color: var(--color-modal-main);
+  color: var(--color-tint-secondary);
+  background-color: var(--color-main-secondary);
   position: fixed;
   top: 50%;
   left: 50%;
@@ -45,7 +45,7 @@
 }
 
 .modal__close {
-  color: var(--color-modal-tint);
+  color: var(--color-tint-secondary);
   font-size: 1.8em;
   position: absolute;
   display: block;

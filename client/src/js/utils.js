@@ -28,11 +28,17 @@ export const getUrlParams = (url) => {
     }, {});
 };
 
-export const formatDuration = (durationInMilliseconds) => {
+export const formatDuration = (durationInMilliseconds, timeFormat = true) => {
   const seconds = durationInMilliseconds / 1000;
   const minutes = Math.floor(seconds / 60);
   const remainderSeconds = Math.round(seconds % 60);
-  return `${minutes}:${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}`;
+
+  return `${minutes}${timeFormat ? ':' : 'm '}${remainderSeconds < 10 ? '0' : '' }${remainderSeconds}${timeFormat ? '' : 's'}`;
+};
+
+export const formatDurationWithAddedMilliseconds = (date, milliseconds) => {
+  date.setSeconds(date.getSeconds() + (milliseconds / 1000));
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
 export const getRandomColor = () => {
