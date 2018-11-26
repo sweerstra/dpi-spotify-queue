@@ -1,0 +1,22 @@
+.tooltip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tooltip:hover::after {
+  content: attr(data-title);
+  position: absolute;
+  min-width: 11rem;
+  top: calc(100% + var(--space-small));
+  padding: var(--space-small);
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+  border-radius: var(--border-radius);
+  color: var(--color-tint-secondary);
+  background: var(--color-main-secondary);
+  box-shadow: 0 .2rem .6rem var(--color-main-secondary);
+  z-index: 4;
+}

@@ -1,0 +1,49 @@
+.container {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 6fr 4fr;
+  grid-template-rows: 8rem 1fr;
+  grid-column-gap: var(--space-large);
+  grid-template-areas: "navigation navigation" "search queue"
+}
+
+.search {
+  grid-area: search;
+  padding-top: var(--space-large);
+  padding-left: var(--space-large);
+}
+
+a {
+  color: var(--color-light);
+  font-weight: bold;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 992px) {
+  .container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr 1fr;
+    grid-template-areas: "navigation" "search" "queue";
+  }
+
+  .search {
+    padding: var(--space-large);
+  }
+}
+
+@media (max-width: 600px) {
+  .group-modal {
+    height: 100%;
+    composes: flex-center from "../../style/layout.css";
+    padding-bottom: 6rem;
+  }
+
+  .group-modal button {
+    position: initial;
+  }
+}

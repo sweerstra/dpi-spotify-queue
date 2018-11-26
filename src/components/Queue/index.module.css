@@ -1,0 +1,79 @@
+.Queue {
+  padding: var(--space-large);
+  height: 100%;
+  box-shadow: 0 .2rem 1.6rem 0 hsla(0, 0%, 0%, 0.2);
+}
+
+.header {
+  height: 8rem;
+  margin-bottom: var(--space-medium);
+  padding: var(--space-medium);
+  color: var(--color-tint);
+  box-shadow: 0 .2rem .6rem 0 hsla(0, 0%, 0%, 0.2);
+  border-radius: var(--border-radius);
+  font-size: 2rem;
+  composes: grid-single-column-flow from "../../style/layout.css";
+}
+
+.title {
+  font-weight: bold;
+}
+
+.icon {
+  stroke: var(--color-tint);
+  stroke-width: 2;
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.icon:hover {
+  stroke-width: 3;
+}
+
+.loading-text {
+  padding: var(--space-medium);
+}
+
+.item-container {
+  padding: 0;
+  list-style-type: none;
+}
+
+.item {
+  margin-bottom: var(--space-small);
+  padding: var(--space-medium);
+  color: var(--color-tint);
+  border-radius: var(--border-radius);
+  composes: grid-single-column-flow from "../../style/layout.css";
+}
+
+.item-name {
+  font-weight: bold;
+  display: block;
+}
+
+.item-duration {
+  font-size: 1.4rem;
+}
+
+@keyframes flickering {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.flicker {
+  animation: flickering 1.5s infinite;
+}
+
+@media (max-width: 992px) {
+  .Queue {
+    margin: 0 var(--space-large);
+  }
+}

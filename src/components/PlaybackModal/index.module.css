@@ -1,0 +1,25 @@
+.modal-content {
+  width: 60rem;
+}
+
+.controls {
+  composes: double-column from "../../style/layout.css";
+}
+
+.controls button {
+  margin-top: auto;
+}
+
+.link {
+  color: var(--color-main);
+  text-decoration: underline;
+}
+
+.current-client-id {
+  padding: var(--space-small) 0;
+}
+
+.client-id {
+  color: var(--color-main);
+  font-weight: bold;
+}

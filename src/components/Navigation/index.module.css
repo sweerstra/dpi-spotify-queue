@@ -1,0 +1,48 @@
+.Navigation {
+  grid-area: navigation;
+  height: 100%;
+  padding: 0 6rem 0 var(--space-large);
+  color: var(--color-tint-secondary);
+  background-color: var(--color-main-secondary);
+  composes: grid-single-column-flow from "../../style/layout.css";
+  grid-gap: var(--space-large);
+  box-shadow: 0 .3rem 1rem 0 rgba(0, 0, 0, 0.5);
+  z-index: 2;
+}
+
+.Navigation button {
+  padding: 0;
+  border: none;
+}
+
+.Navigation button:hover {
+  text-decoration: underline;
+}
+
+.icon {
+  width: 2.4rem;
+  height: 2.4rem;
+}
+
+.icon:hover,
+.icon.active {
+  stroke: var(--color-main);
+}
+
+.link {
+  composes: flex-center from "../../style/layout.css";
+}
+
+.Navigation .logged-in {
+  color: var(--color-main);
+  font-weight: bold;
+}
+
+@media (max-width: 992px) {
+  .Navigation {
+    padding-top: var(--space-medium);
+    padding-bottom: var(--space-large);
+    grid-auto-flow: row;
+    font-size: 1.4rem;
+  }
+}

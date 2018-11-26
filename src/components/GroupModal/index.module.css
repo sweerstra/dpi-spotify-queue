@@ -1,0 +1,11 @@
+.content {
+  width: 50rem;
+}
+
+.content-box {
+  composes: double-column from "../../style/layout.css";
+}
+
+.content-box button {
+  margin-top: auto;
+}
