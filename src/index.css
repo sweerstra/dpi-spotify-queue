@@ -1,0 +1,45 @@
+@import "./style/controls.css";
+@import "./style/tooltip.css";
+
+:root {
+  --color-main: #1ed760;
+  --color-tint: #2F3034;
+  --color-button-main: #56575f;
+  --color-button-tint: var(--color-main);
+  --color-main-secondary: #2F3034;
+  --color-tint-secondary: var(--color-light);
+  --color-main-alpha-1: rgba(0, 0, 0, 0.1);
+  --color-main-alpha-2: rgba(0, 0, 0, 0.15);
+  --color-light: #f2f2f2;
+  --color-light-hover: #e1e0e5;
+  --space-small: 1rem;
+  --space-medium: 2rem;
+  --space-large: 4rem;
+  --border-radius: .4rem;
+}
+
+/* Set box-sizing globally to handle padding and border widths */
+*,
+*:after,
+*:before {
+  box-sizing: inherit;
+}
+
+/* The base font-size is set at 62.5% for having the convenience
+   of sizing rems in a way that is similar to using px: 1.6rem = 16px */
+html {
+  box-sizing: border-box;
+  font-size: 62.5%;
+}
+
+body {
+  background-color: var(--color-main);
+  color: var(--color-tint);
+  font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+  font-size: 1.6em; /* Currently ems cause chrome bug misinterpreting rems on body element */
+  font-weight: 300;
+  letter-spacing: .01em;
+  line-height: 1.6;
+  margin: 0;
+}
+

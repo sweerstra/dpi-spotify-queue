@@ -1,0 +1,46 @@
+.Modal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.1);
+  transition: visibility 0s linear 0.25s;
+  z-index: 10;
+}
+
+.open {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1.0);
+  transition: visibility 0s linear 0s, opacity 0.25s 0s;
+}
+
+.content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40rem;
+  transform: translate(-50%, -50%);
+  color: var(--color-tint-secondary);
+  background-color: var(--color-main-secondary);
+  padding: var(--space-medium);
+  border-radius: var(--border-radius);
+  box-shadow: 0 .2rem .6rem 0 hsla(0, 0%, 0%, 0.2);
+}
+
+.title {
+  composes: heading-small from "../../style/typography.css";
+}
+
+.close {
+  width: 1.5rem;
+  font-size: 3rem;
+  line-height: 1.5rem;
+  color: var(--color-tint-secondary);
+  text-align: center;
+  cursor: pointer;
+  float: right;
+}

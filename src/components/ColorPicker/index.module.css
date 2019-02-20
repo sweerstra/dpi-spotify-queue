@@ -1,0 +1,43 @@
+.colors,
+.customs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.item {
+  width: 4rem;
+  height: 4rem;
+  margin: var(--space-small);
+  border-radius: 50%;
+  box-shadow: 0 0.2rem 0.6rem 0 hsla(0, 0%, 0%, 0.8);
+  cursor: pointer;
+  user-select: none;
+}
+
+.divider {
+  height: .1rem;
+  margin: 2rem 0;
+  background-color: var(--color-tint-secondary);
+}
+
+.item-custom {
+  composes: item;
+  composes: flex-center from "../../style/layout.css";
+  background-color: var(--color-main);
+  color: var(--color-tint);
+  font-size: 1.3rem;
+  font-weight: bold;
+  box-shadow: none;
+}
+
+.item:active,
+.item-custom.active {
+  border: .2rem solid var(--color-tint-secondary);
+}
+
+.item-custom.icon {
+  stroke: var(--color-tint);
+  width: 2rem;
+  height: 2rem;
+}

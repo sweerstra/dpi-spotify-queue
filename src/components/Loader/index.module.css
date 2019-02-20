@@ -1,0 +1,35 @@
+.Loader {
+  display: inline-block;
+  position: relative;
+  width: 6.4rem;
+  height: 6.4rem;
+}
+
+.first {
+  position: absolute;
+  border: .4rem solid var(--color-tint);
+  opacity: 1;
+  border-radius: 50%;
+  animation: load 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.second {
+  animation-delay: -0.5s;
+}
+
+@keyframes load {
+  0% {
+    top: 2.8rem;
+    left: 2.8rem;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: -.1rem;
+    left: -.1rem;
+    width: 5.8rem;
+    height: 5.8rem;
+    opacity: 0;
+  }
+}

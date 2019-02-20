@@ -1,0 +1,59 @@
+.results {
+  grid-area: search;
+  padding: 0;
+  color: var(--color-tint);
+  font-size: 1.6rem;
+  list-style-type: none;
+}
+
+.item {
+  padding: var(--space-small) var(--space-medium);
+  margin-top: var(--space-small);
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+}
+
+.item:hover,
+.item:active {
+  background-color: var(--color-main-alpha-1);
+  transition: background linear 200ms;
+  cursor: pointer;
+}
+
+.item:active {
+  background-color: var(--color-main-alpha-2);
+}
+
+.item-image {
+  min-width: 5rem;
+  height: 5rem;
+  border-radius: var(--border-radius);
+}
+
+.item-name {
+  font-weight: bold;
+  padding-left: var(--space-medium);
+}
+
+.item-artist {
+  margin-left: auto;
+  text-align: right;
+}
+
+.item-duration {
+  margin-left: var(--space-medium);
+  width: 5rem;
+  font-style: italic;
+  text-align: right;
+}
+
+.no-results {
+  padding-left: var(--space-medium);
+}
+
+.loader {
+  display: flex;
+  justify-content: center;
+  padding-top: 10rem;
+}
